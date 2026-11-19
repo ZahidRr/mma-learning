@@ -1,0 +1,1 @@
+{"version":3,"file":"adaptive.module.js","sourceRoot":"","sources":["../../src/adaptive/adaptive.module.ts"],"names":[],"mappings":";;;;;;AAAA,OAAO,EAAE,MAAM,EAAE,MAAM,gBAAgB,CAAC;AAExC,OAAO,EAAE,eAAe,EAAE,MAAM,uBAAuB,CAAC;AAWjD,IAAM,cAAc,GAApB,MAAM,cAAc;CAAG,CAAA;AAAjB,cAAc;IAT1B,MAAM,CAAC;QACN,SAAS,EAAE;YACT,eAAe;SAChB;QAED,OAAO,EAAE;YACP,eAAe;SAChB;KACF,CAAC;GACW,cAAc,CAAG"}

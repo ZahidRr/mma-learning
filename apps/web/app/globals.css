@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+/* =========================================================
+   ROOT THEME
+========================================================= */
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+/* =========================================================
+   GLOBAL RESET
+========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-nunito), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Supaya form element ikut pakai Nunito */
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* =========================================================
+   AUTH INPUT
+========================================================= */
+
+.auth-input {
+  caret-color: #2479ef;
+}
+
+/* Hilangkan browser autofill biru/kuning pada Chrome / Edge */
+
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill:active {
+  -webkit-text-fill-color: #263f70 !important;
+
+  -webkit-box-shadow:
+    0 0 0 1000px #ffffff inset !important;
+
+  box-shadow:
+    0 0 0 1000px #ffffff inset !important;
+
+  caret-color: #2479ef !important;
+
+  transition:
+    background-color 9999s ease-out 0s,
+    color 9999s ease-out 0s;
+}
+
+/* Autofill Firefox */
+.auth-input:autofill {
+  color: #263f70;
+  background: #ffffff;
+}
+
+/* =========================================================
+   AUTH PLACEHOLDER
+========================================================= */
+
+.auth-input::placeholder {
+  color: #9ca9c2;
+  opacity: 1;
+}
+
+/* =========================================================
+   SELECTION
+========================================================= */
+
+::selection {
+  background: #dcecff;
+  color: #173b86;
+}
+
+@keyframes scaleFadeIn {
+  0% { opacity: 0; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}

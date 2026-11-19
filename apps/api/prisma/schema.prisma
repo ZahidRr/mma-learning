@@ -1,0 +1,389 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  SHORT_ANSWER
+}
+
+enum QuestionSource {
+  FIXED
+  PARAMETERIZED
+}
+
+enum QuestionFormat {
+  STANDARD
+  WORD_PROBLEM
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum LessonSessionStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+enum QuestionDeliveryStatus {
+  PRESENTED
+  ANSWERED
+  EXPIRED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  role         UserRole   @default(STUDENT)
+  status       UserStatus @default(ACTIVE)
+
+  learnerProfile LearnerProfile?
+
+  attempts       QuestionAttempt[]
+  skillMasteries SkillMastery[]
+  lessonSessions LessonSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LearnerProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  displayName String
+  gradeLevel  Int
+  avatarKey   String?
+
+  totalXp Int @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Curriculum {
+  id          String  @id @default(cuid())
+  name        String
+  code        String  @unique
+  description String?
+
+  status ContentStatus @default(DRAFT)
+
+  subjects Subject[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Subject {
+  id           String @id @default(cuid())
+  curriculumId String
+
+  name        String
+  slug        String
+  description String?
+  iconKey     String?
+
+  orderIndex Int           @default(0)
+  status     ContentStatus @default(DRAFT)
+
+  curriculum Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+
+  topics Topic[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([curriculumId, slug])
+  @@index([curriculumId])
+}
+
+model Topic {
+  id        String @id @default(cuid())
+  subjectId String
+
+  name        String
+  slug        String
+  description String?
+
+  gradeLevel Int
+  orderIndex Int @default(0)
+
+  status ContentStatus @default(DRAFT)
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  skills Skill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([subjectId, gradeLevel, slug])
+  @@index([subjectId])
+  @@index([gradeLevel])
+}
+
+model Skill {
+  id      String @id @default(cuid())
+  topicId String
+
+  name        String
+  slug        String
+  description String?
+
+  orderIndex Int           @default(0)
+  status     ContentStatus @default(DRAFT)
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  lessons   Lesson[]
+  questions Question[]
+  masteries SkillMastery[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([topicId, slug])
+  @@index([topicId])
+}
+
+model Lesson {
+  id      String @id @default(cuid())
+  skillId String
+
+  title       String
+  slug        String
+  description String?
+
+  orderIndex Int @default(0)
+  xpReward   Int @default(50)
+
+  status ContentStatus @default(DRAFT)
+
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  questions Question[]
+  sessions  LessonSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([skillId, slug])
+  @@index([skillId])
+}
+
+model Question {
+  id   String @id @default(cuid())
+  code String @unique
+
+  lessonId String
+  skillId  String
+
+  type       QuestionType
+  source     QuestionSource
+  format     QuestionFormat  @default(STANDARD)
+  difficulty DifficultyLevel
+
+  prompt      String
+  explanation String?
+
+  answerConfig Json?
+
+  orderIndex Int           @default(0)
+  status     ContentStatus @default(DRAFT)
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  skill  Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  options            QuestionOption[]
+  template           QuestionTemplate?
+  generatedQuestions GeneratedQuestion[]
+  attempts           QuestionAttempt[]
+  deliveries         QuestionDelivery[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([lessonId])
+  @@index([skillId])
+  @@index([difficulty])
+  @@index([status])
+}
+
+model QuestionOption {
+  id         String @id @default(cuid())
+  questionId String
+
+  text       String
+  isCorrect  Boolean @default(false)
+  orderIndex Int     @default(0)
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([questionId])
+}
+
+model QuestionTemplate {
+  id         String @id @default(cuid())
+  questionId String @unique
+
+  template     String
+  generatorKey String
+  config       Json
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GeneratedQuestion {
+  id         String @id @default(cuid())
+  questionId String
+
+  prompt        String
+  correctAnswer String
+  variables     Json?
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  attempt  QuestionAttempt?
+  delivery QuestionDelivery?
+
+  createdAt DateTime @default(now())
+
+  @@index([questionId])
+}
+
+model QuestionDelivery {
+  id String @id @default(cuid())
+
+  lessonSessionId     String
+  questionId          String
+  generatedQuestionId String? @unique
+
+  status QuestionDeliveryStatus @default(PRESENTED)
+
+  lessonSession     LessonSession      @relation(fields: [lessonSessionId], references: [id], onDelete: Cascade)
+  question          Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  generatedQuestion GeneratedQuestion? @relation(fields: [generatedQuestionId], references: [id], onDelete: SetNull)
+
+  attempt QuestionAttempt?
+
+  presentedAt DateTime  @default(now())
+  answeredAt  DateTime?
+
+  @@index([lessonSessionId])
+  @@index([questionId])
+  @@index([status])
+}
+
+model QuestionAttempt {
+  id String @id @default(cuid())
+
+  userId              String
+  questionId          String
+  generatedQuestionId String? @unique
+  lessonSessionId     String?
+  deliveryId          String? @unique
+
+  answer    String
+  isCorrect Boolean
+  timeSpent Int?
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question          Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  generatedQuestion GeneratedQuestion? @relation(fields: [generatedQuestionId], references: [id], onDelete: SetNull)
+  lessonSession     LessonSession?     @relation(fields: [lessonSessionId], references: [id], onDelete: SetNull)
+  delivery          QuestionDelivery?  @relation(fields: [deliveryId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([questionId])
+  @@index([lessonSessionId])
+}
+
+model SkillMastery {
+  id String @id @default(cuid())
+
+  userId  String
+  skillId String
+
+  masteryScore Float @default(0)
+
+  totalAttempts   Int @default(0)
+  correctAttempts Int @default(0)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+}
+
+model LessonSession {
+  id String @id @default(cuid())
+
+  userId   String
+  lessonId String
+
+  targetQuestions   Int @default(10)
+  answeredQuestions Int @default(0)
+  correctAnswers    Int @default(0)
+
+  earnedXp Int @default(0)
+
+  status LessonSessionStatus @default(IN_PROGRESS)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  attempts   QuestionAttempt[]
+  deliveries QuestionDelivery[]
+
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([lessonId])
+  @@index([status])
+}

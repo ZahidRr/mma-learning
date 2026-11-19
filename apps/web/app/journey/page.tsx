@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import useSound from 'use-sound';
 import Header from '../components/Header';
-import { regionLabel } from '../lib/regions';
+import { regionLabel, nodeTitle } from '../lib/regions';
 
 // =========================================================
 // DEBUG: set ke true untuk kalibrasi koordinat.
@@ -28,7 +28,6 @@ interface Point {
 
 interface RegionData {
   id: string;
-  title: string;
   x: number;
   y: number;
 }
@@ -84,11 +83,11 @@ type ProgressResponse = {
 // =========================================================
 
 const mathRegions: RegionData[] = [
-  { id: 'mr1', title: regionLabel('mr1'), x: 22, y: 92 },
-  { id: 'mr2', title: regionLabel('mr2'), x: 20, y: 66 },
-  { id: 'mr3', title: regionLabel('mr3'), x: 86, y: 50 },
-  { id: 'mr4', title: regionLabel('mr4'), x: 28, y: 30 },
-  { id: 'mr5', title: regionLabel('mr5'), x: 50, y: 7 },
+  { id: 'mr1', x: 22, y: 92 },
+  { id: 'mr2', x: 20, y: 66 },
+  { id: 'mr3', x: 86, y: 50 },
+  { id: 'mr4', x: 28, y: 30 },
+  { id: 'mr5', x: 50, y: 7 },
 ];
 
 const mathNodeTemplates: JourneyNodeTemplate[] = [
@@ -142,11 +141,11 @@ const mathPathPoints: Point[] = [
 // =========================================================
 
 const englishRegions: RegionData[] = [
-  { id: 'er1', title: regionLabel('er1'), x: 20, y: 70 },
-  { id: 'er2', title: regionLabel('er2'), x: 85, y: 68 },
-  { id: 'er3', title: regionLabel('er3'), x: 22, y: 40 },
-  { id: 'er4', title: regionLabel('er4'), x: 80, y: 22 },
-  { id: 'er5', title: regionLabel('er5'), x: 30, y: 8 },
+  { id: 'er1', x: 20, y: 70 },
+  { id: 'er2', x: 85, y: 68 },
+  { id: 'er3', x: 22, y: 40 },
+  { id: 'er4', x: 80, y: 22 },
+  { id: 'er5', x: 30, y: 8 },
 ];
 
 const englishNodeTemplates: JourneyNodeTemplate[] = [
@@ -257,6 +256,7 @@ function buildLiveNodes(
 
     return {
       ...tpl,
+      title: nodeTitle(tpl.id, safeGrade),
       lessonId,
       status,
     };
@@ -386,12 +386,12 @@ function JourneyPageContent() {
     }
   }, [activeSubject, loading, nodes]);
 
-  // Klik node -> masuk Battle, membawa subject, lessonId sesuai grade, dan regionId
+  // Klik node -> masuk Battle, membawa subject, lessonId sesuai grade, regionId, dan grade
   const handleNodeClick = (node: JourneyNodeData) => {
     playClick();
     if (node.status !== 'locked') {
       router.push(
-        `/battle?subject=${activeSubject}&lessonId=${node.lessonId}&regionId=${node.regionId}`
+        `/battle?subject=${activeSubject}&lessonId=${node.lessonId}&regionId=${node.regionId}&grade=${gradeLevel}`
       );
     }
   };
@@ -621,7 +621,7 @@ function JourneyPageContent() {
                     >
                       <div className="flex items-center gap-[6px] rounded-full border border-white/80 bg-white/65 px-[11px] py-[5px] shadow-[0_3px_9px_rgba(12,48,102,0.10)] backdrop-blur-sm">
                         <span className="text-[11px] font-extrabold tracking-wide text-[#0f3470]">
-                          {region.title}
+                          {regionLabel(region.id, gradeLevel)}
                         </span>
                       </div>
                     </div>

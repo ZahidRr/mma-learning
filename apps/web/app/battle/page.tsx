@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import "./battle.css";
 import { AnimatePresence, motion } from "framer-motion";
@@ -39,16 +39,32 @@ interface SessionStats {
   targetQuestions: number;
 }
 
-export default function BattlePage() {
+function BattlePageContent() {
   const searchParams = useSearchParams();
   const subject = searchParams.get("subject") || "math";
   const subjectKey: SubjectKey = subject === "english" ? "english" : "math";
-  const defaultLessonId = subject === "english" ? "lesson_eng_01" : "lesson_math_01";
-  const lessonId = searchParams.get("lessonId") || defaultLessonId;
 
-  // Region (Topic) tempat Node berada. Kalau tidak dikirim, pakai region awal subject.
+  // Ambil grade dari URL (?grade=6), atau ekstrak dari lessonId (lesson_g6_math_01) sebagai fallback
+  const rawLessonId = searchParams.get("lessonId");
+  const gradeParam = searchParams.get("grade");
+  const parsedGradeParam = gradeParam ? Number(gradeParam) : NaN;
+  const lessonGradeMatch = rawLessonId?.match(/^lesson_g(\d+)_/);
+  const resolvedGrade = !Number.isNaN(parsedGradeParam)
+    ? parsedGradeParam
+    : lessonGradeMatch
+      ? Number(lessonGradeMatch[1])
+      : 1;
+  const gradeLevel = Math.min(Math.max(resolvedGrade, 1), 6);
+
+  const defaultLessonId =
+    subjectKey === "english"
+      ? `lesson_g${gradeLevel}_eng_01`
+      : `lesson_g${gradeLevel}_math_01`;
+  const lessonId = rawLessonId || defaultLessonId;
+
+  // Region (Topic) tempat Node berada, dengan nama dinamis sesuai gradeLevel
   const regionId = searchParams.get("regionId") || DEFAULT_REGION[subjectKey];
-  const region = getRegion(regionId);
+  const region = getRegion(regionId, gradeLevel);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -62,7 +78,7 @@ export default function BattlePage() {
   const [currentDeliveryId, setCurrentDeliveryId] = useState<string | null>(null);
   const [correctOptionId, setCorrectOptionId] = useState<string | null>(null);
 
-  // Nama region dari config; fallback ke judul lesson dari backend jika region tidak dikenal
+  // Nama region sesuai tier kelas; fallback ke judul lesson dari backend jika region tidak dikenal
   const [regionName, setRegionName] = useState(region?.name ?? "Loading Adventure...");
 
   const [selected, setSelected] = useState<string | null>(null);
@@ -108,38 +124,10 @@ export default function BattlePage() {
   }, []);
 
   useEffect(() => {
-    if (!userId) return;
-
-    async function startSession() {
-      try {
-        const res = await fetch(`${API_BASE_URL}/lesson-sessions/start`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, lessonId }),
-        });
-
-        if (!res.ok) throw new Error("Gagal memulai sesi");
-
-        const data = await res.json();
-        setSessionData(data.session);
-
-        // Prioritas: nama region dari config. Kalau region tidak dikenal, pakai judul lesson.
-        if (region) {
-          setRegionName(region.name);
-        } else if (data.lesson) {
-          setRegionName(data.lesson.title || "Unknown Region");
-        }
-
-        fetchNextQuestion(data.session.id);
-      } catch (error) {
-        console.error("Error starting session:", error);
-        setLoadingInitial(false);
-      }
+    if (region?.name) {
+      setRegionName(region.name);
     }
-
-    startSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lessonId, userId, subject, regionId, API_BASE_URL]);
+  }, [region?.name]);
 
   const fetchNextQuestion = useCallback(async (sessionId: string) => {
     setFetchingNext(true);
@@ -180,6 +168,40 @@ export default function BattlePage() {
       setLoadingInitial(false);
     }
   }, [lessonId, API_BASE_URL]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    async function startSession() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/lesson-sessions/start`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, lessonId }),
+        });
+
+        if (!res.ok) throw new Error("Gagal memulai sesi");
+
+        const data = await res.json();
+        setSessionData(data.session);
+
+        // Prioritas: nama region dari config sesuai grade. Kalau region tidak dikenal, pakai judul lesson.
+        if (region) {
+          setRegionName(region.name);
+        } else if (data.lesson) {
+          setRegionName(data.lesson.title || "Unknown Region");
+        }
+
+        fetchNextQuestion(data.session.id);
+      } catch (error) {
+        console.error("Error starting session:", error);
+        setLoadingInitial(false);
+      }
+    }
+
+    startSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonId, userId, subject, regionId, gradeLevel, API_BASE_URL]);
 
   const handleCheck = async () => {
     playClickSound();
@@ -455,5 +477,19 @@ export default function BattlePage() {
         </AnimatePresence>
       </div>
     </main>
+  );
+}
+
+export default function BattlePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-[100dvh] items-center justify-center bg-[#e4f8ff] font-bold text-[#0c347a] text-xl">
+          Loading your adventure...
+        </div>
+      }
+    >
+      <BattlePageContent />
+    </Suspense>
   );
 }

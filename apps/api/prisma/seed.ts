@@ -23,6 +23,13 @@ const prisma = new PrismaClient({
 
 type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 type Format = 'STANDARD' | 'WORD_PROBLEM';
+type GradeTier = 'tier1' | 'tier2' | 'tier3';
+
+function getGradeTier(grade: number): GradeTier {
+  if (grade >= 5) return 'tier3';
+  if (grade >= 3) return 'tier2';
+  return 'tier1';
+}
 
 type CompactQ = [
   difficulty: Difficulty,
@@ -38,35 +45,179 @@ type CompactQ = [
 type NodeMeta = {
   index: number; // 1..9
   topicSlug: string;
-  topicName: string;
+  topicNames: Record<GradeTier, string>;
   topicDesc: string;
   skillSlug: string;
-  skillName: string;
+  skillNames: Record<GradeTier, string>;
   skillDesc: string;
 };
 
 const MATH_NODES: NodeMeta[] = [
-  { index: 1, topicSlug: 'counting-meadow', topicName: 'Counting Meadow', topicDesc: 'Padang rumput tempat petualangan berhitung dimulai.', skillSlug: 'counting-and-numbers', skillName: 'Counting & Numbers', skillDesc: 'Number sequences, comparing, and number sense.' },
-  { index: 2, topicSlug: 'counting-meadow', topicName: 'Counting Meadow', topicDesc: 'Padang rumput tempat petualangan berhitung dimulai.', skillSlug: 'place-value', skillName: 'Place Value', skillDesc: 'Understanding digit values in numbers.' },
-  { index: 3, topicSlug: 'add-sub-village', topicName: 'Add & Sub Village', topicDesc: 'Desa ceria untuk melatih penjumlahan dan pengurangan.', skillSlug: 'addition', skillName: 'Addition', skillDesc: 'Adding numbers accurately.' },
-  { index: 4, topicSlug: 'add-sub-village', topicName: 'Add & Sub Village', topicDesc: 'Desa ceria untuk melatih penjumlahan dan pengurangan.', skillSlug: 'subtraction', skillName: 'Subtraction', skillDesc: 'Subtracting numbers accurately.' },
-  { index: 5, topicSlug: 'fractions-desert', topicName: 'Fractions Desert', topicDesc: 'Gurun pasir tempat belajar pecahan dan desimal.', skillSlug: 'fractions', skillName: 'Fractions', skillDesc: 'Understanding and operating with fractions.' },
-  { index: 6, topicSlug: 'fractions-desert', topicName: 'Fractions Desert', topicDesc: 'Gurun pasir tempat belajar pecahan dan desimal.', skillSlug: 'decimals', skillName: 'Decimals', skillDesc: 'Understanding and operating with decimals.' },
-  { index: 7, topicSlug: 'multi-forest', topicName: 'Multi Forest', topicDesc: 'Hutan rimbun tempat berlatih persen dan perkalian.', skillSlug: 'percentages', skillName: 'Percentages', skillDesc: 'Understanding and calculating percentages.' },
-  { index: 8, topicSlug: 'multi-forest', topicName: 'Multi Forest', topicDesc: 'Hutan rimbun tempat berlatih persen dan perkalian.', skillSlug: 'multiplication', skillName: 'Multiplication', skillDesc: 'Multiplying numbers and solving equal-group problems.' },
-  { index: 9, topicSlug: 'geometry-castle', topicName: 'Geometry Castle', topicDesc: 'Kastil kristal untuk tantangan pembagian dan pemecahan masalah.', skillSlug: 'division', skillName: 'Division', skillDesc: 'Dividing numbers and sharing equally.' },
+  {
+    index: 1,
+    topicSlug: 'counting-meadow',
+    topicNames: { tier1: 'Counting Meadow', tier2: 'Number Meadow', tier3: 'Integer Meadow' },
+    topicDesc: 'Padang rumput tempat petualangan bilangan dimulai.',
+    skillSlug: 'counting-and-numbers',
+    skillNames: { tier1: 'Counting & Numbers', tier2: 'Rounding & Primes', tier3: 'Exponents & Integers' },
+    skillDesc: 'Number sense, patterns, primes, exponents, and integers.',
+  },
+  {
+    index: 2,
+    topicSlug: 'counting-meadow',
+    topicNames: { tier1: 'Counting Meadow', tier2: 'Number Meadow', tier3: 'Integer Meadow' },
+    topicDesc: 'Padang rumput tempat petualangan bilangan dimulai.',
+    skillSlug: 'place-value',
+    skillNames: { tier1: 'Place Value', tier2: 'Large Place Value', tier3: 'Decimal Place Value' },
+    skillDesc: 'Understanding digit values in whole and decimal numbers.',
+  },
+  {
+    index: 3,
+    topicSlug: 'add-sub-village',
+    topicNames: { tier1: 'Add & Sub Village', tier2: 'Operation Village', tier3: 'Algebra Village' },
+    topicDesc: 'Desa ceria untuk melatih operasi penjumlahan dan pengurangan.',
+    skillSlug: 'addition',
+    skillNames: { tier1: 'Addition', tier2: 'Multi-Digit Addition', tier3: 'Integer & Decimal Add' },
+    skillDesc: 'Adding whole numbers, decimals, and integers accurately.',
+  },
+  {
+    index: 4,
+    topicSlug: 'add-sub-village',
+    topicNames: { tier1: 'Add & Sub Village', tier2: 'Operation Village', tier3: 'Algebra Village' },
+    topicDesc: 'Desa ceria untuk melatih operasi penjumlahan dan pengurangan.',
+    skillSlug: 'subtraction',
+    skillNames: { tier1: 'Subtraction', tier2: 'Multi-Digit Subtraction', tier3: 'Integer & Decimal Sub' },
+    skillDesc: 'Subtracting whole numbers, decimals, and integers accurately.',
+  },
+  {
+    index: 5,
+    topicSlug: 'fractions-desert',
+    topicNames: { tier1: 'Fractions Desert', tier2: 'Fractions Desert', tier3: 'Rational Desert' },
+    topicDesc: 'Gurun pasir tempat belajar pecahan dan desimal.',
+    skillSlug: 'fractions',
+    skillNames: { tier1: 'Basic Fractions', tier2: 'Equivalent Fractions', tier3: 'Fraction Operations' },
+    skillDesc: 'Understanding, simplifying, and operating with fractions.',
+  },
+  {
+    index: 6,
+    topicSlug: 'fractions-desert',
+    topicNames: { tier1: 'Fractions Desert', tier2: 'Fractions Desert', tier3: 'Rational Desert' },
+    topicDesc: 'Gurun pasir tempat belajar pecahan dan desimal.',
+    skillSlug: 'decimals',
+    skillNames: { tier1: 'Intro Decimals', tier2: 'Decimal Operations', tier3: 'Advanced Decimals' },
+    skillDesc: 'Understanding and operating with decimals.',
+  },
+  {
+    index: 7,
+    topicSlug: 'multi-forest',
+    topicNames: { tier1: 'Multi Forest', tier2: 'Multi Forest', tier3: 'Ratio Forest' },
+    topicDesc: 'Hutan rimbun tempat berlatih persen, rasio, dan perkalian.',
+    skillSlug: 'percentages',
+    skillNames: { tier1: 'Intro Percentages', tier2: 'Calculating Percent', tier3: 'Discounts & % Change' },
+    skillDesc: 'Understanding and calculating percentages and percentage change.',
+  },
+  {
+    index: 8,
+    topicSlug: 'multi-forest',
+    topicNames: { tier1: 'Multi Forest', tier2: 'Multi Forest', tier3: 'Ratio Forest' },
+    topicDesc: 'Hutan rimbun tempat berlatih persen, rasio, dan perkalian.',
+    skillSlug: 'multiplication',
+    skillNames: { tier1: 'Multiplication', tier2: 'Multi-Digit Multiply', tier3: 'Rates & Integers' },
+    skillDesc: 'Multiplying numbers, rates, and solving equal-group problems.',
+  },
+  {
+    index: 9,
+    topicSlug: 'geometry-castle',
+    topicNames: { tier1: 'Sharing Castle', tier2: 'Division Castle', tier3: 'Mastery Castle' },
+    topicDesc: 'Kastil kristal untuk tantangan pembagian dan pemecahan masalah.',
+    skillSlug: 'division',
+    skillNames: { tier1: 'Basic Division', tier2: 'Long Division', tier3: 'Unit Rates & Division' },
+    skillDesc: 'Dividing numbers, unit rates, and sharing equally.',
+  },
 ];
 
 const ENGLISH_NODES: NodeMeta[] = [
-  { index: 1, topicSlug: 'alphabet-library', topicName: 'Alphabet Library', topicDesc: 'Perpustakaan ajaib untuk huruf, fonik, dan pelafalan.', skillSlug: 'alphabet-and-phonics', skillName: 'Alphabet & Phonics', skillDesc: 'Letters, spelling patterns, and word structure.' },
-  { index: 2, topicSlug: 'alphabet-library', topicName: 'Alphabet Library', topicDesc: 'Perpustakaan ajaib untuk huruf, fonik, dan pelafalan.', skillSlug: 'pronunciation', skillName: 'Pronunciation', skillDesc: 'Rhymes, syllables, homophones, and word sounds.' },
-  { index: 3, topicSlug: 'vocab-harbor', topicName: 'Vocab Harbor', topicDesc: 'Pelabuhan kata untuk memperkaya kosakata.', skillSlug: 'vocabulary', skillName: 'Vocabulary', skillDesc: 'Building rich English vocabulary.' },
-  { index: 4, topicSlug: 'vocab-harbor', topicName: 'Vocab Harbor', topicDesc: 'Pelabuhan kata untuk memperkaya kosakata.', skillSlug: 'parts-of-speech', skillName: 'Parts of Speech', skillDesc: 'Nouns, verbs, adjectives, adverbs, and clauses.' },
-  { index: 5, topicSlug: 'grammar-quarter', topicName: 'Grammar Quarter', topicDesc: 'Kawasan tata bahasa untuk sinonim dan kalimat.', skillSlug: 'synonyms', skillName: 'Synonyms', skillDesc: 'Words with similar meanings and nuances.' },
-  { index: 6, topicSlug: 'grammar-quarter', topicName: 'Grammar Quarter', topicDesc: 'Kawasan tata bahasa untuk sinonim dan kalimat.', skillSlug: 'grammar-and-tenses', skillName: 'Grammar & Tenses', skillDesc: 'Sentence structure and verb tenses.' },
-  { index: 7, topicSlug: 'listening-garden', topicName: 'Listening Garden', topicDesc: 'Taman tenang untuk percakapan dan pemahaman.', skillSlug: 'conversations', skillName: 'Conversations', skillDesc: 'Polite and natural everyday dialogues.' },
-  { index: 8, topicSlug: 'listening-garden', topicName: 'Listening Garden', topicDesc: 'Taman tenang untuk percakapan dan pemahaman.', skillSlug: 'listening', skillName: 'Listening', skillDesc: 'Understanding spoken clues and short passages.' },
-  { index: 9, topicSlug: 'speaking-lodge', topicName: 'Speaking Lodge', topicDesc: 'Pondok salju untuk melatih ekspresi dan bercerita.', skillSlug: 'speaking', skillName: 'Speaking', skillDesc: 'Expressing ideas clearly and accurately.' },
+  {
+    index: 1,
+    topicSlug: 'alphabet-library',
+    topicNames: { tier1: 'Alphabet Library', tier2: 'Word Root Library', tier3: 'Etymology Library' },
+    topicDesc: 'Perpustakaan ajaib untuk huruf, fonik, ejaan, dan akar kata.',
+    skillSlug: 'alphabet-and-phonics',
+    skillNames: { tier1: 'Alphabet & Phonics', tier2: 'Prefixes & Spelling', tier3: 'Roots & Etymology' },
+    skillDesc: 'Letters, spelling patterns, prefixes, and word roots.',
+  },
+  {
+    index: 2,
+    topicSlug: 'alphabet-library',
+    topicNames: { tier1: 'Alphabet Library', tier2: 'Word Root Library', tier3: 'Etymology Library' },
+    topicDesc: 'Perpustakaan ajaib untuk huruf, fonik, ejaan, dan akar kata.',
+    skillSlug: 'pronunciation',
+    skillNames: { tier1: 'Rhyming & Sounds', tier2: 'Homophones & Syllables', tier3: 'Phonetics & Stress' },
+    skillDesc: 'Rhymes, syllables, homophones, and word sounds.',
+  },
+  {
+    index: 3,
+    topicSlug: 'vocab-harbor',
+    topicNames: { tier1: 'Vocab Harbor', tier2: 'Lexicon Harbor', tier3: 'Expression Harbor' },
+    topicDesc: 'Pelabuhan kata untuk memperkaya kosakata dan ungkapan.',
+    skillSlug: 'vocabulary',
+    skillNames: { tier1: 'Daily Vocabulary', tier2: 'Context Vocabulary', tier3: 'Academic & Idioms' },
+    skillDesc: 'Building rich English vocabulary and expressions.',
+  },
+  {
+    index: 4,
+    topicSlug: 'vocab-harbor',
+    topicNames: { tier1: 'Vocab Harbor', tier2: 'Lexicon Harbor', tier3: 'Expression Harbor' },
+    topicDesc: 'Pelabuhan kata untuk memperkaya kosakata dan ungkapan.',
+    skillSlug: 'parts-of-speech',
+    skillNames: { tier1: 'Nouns & Verbs', tier2: 'Adverbs & Pronouns', tier3: 'Clauses & Gerunds' },
+    skillDesc: 'Nouns, verbs, adjectives, adverbs, and clauses.',
+  },
+  {
+    index: 5,
+    topicSlug: 'grammar-quarter',
+    topicNames: { tier1: 'Grammar Quarter', tier2: 'Grammar Quarter', tier3: 'Syntax Quarter' },
+    topicDesc: 'Kawasan tata bahasa untuk sinonim, nuansa kata, dan kalimat.',
+    skillSlug: 'synonyms',
+    skillNames: { tier1: 'Basic Synonyms', tier2: 'Strong Synonyms', tier3: 'Word Nuances' },
+    skillDesc: 'Words with similar meanings and nuances.',
+  },
+  {
+    index: 6,
+    topicSlug: 'grammar-quarter',
+    topicNames: { tier1: 'Grammar Quarter', tier2: 'Grammar Quarter', tier3: 'Syntax Quarter' },
+    topicDesc: 'Kawasan tata bahasa untuk sinonim, nuansa kata, dan kalimat.',
+    skillSlug: 'grammar-and-tenses',
+    skillNames: { tier1: 'Basic Grammar', tier2: 'Tenses & Comparison', tier3: 'Conditionals & Passive' },
+    skillDesc: 'Sentence structure, verb tenses, and advanced grammar.',
+  },
+  {
+    index: 7,
+    topicSlug: 'listening-garden',
+    topicNames: { tier1: 'Listening Garden', tier2: 'Dialogue Garden', tier3: 'Rhetoric Garden' },
+    topicDesc: 'Taman tenang untuk percakapan, diskusi, dan pemahaman.',
+    skillSlug: 'conversations',
+    skillNames: { tier1: 'Polite Greetings', tier2: 'Group Discussions', tier3: 'Formal & Debate' },
+    skillDesc: 'Polite, persuasive, and natural everyday dialogues.',
+  },
+  {
+    index: 8,
+    topicSlug: 'listening-garden',
+    topicNames: { tier1: 'Listening Garden', tier2: 'Dialogue Garden', tier3: 'Rhetoric Garden' },
+    topicDesc: 'Taman tenang untuk percakapan, diskusi, dan pemahaman.',
+    skillSlug: 'listening',
+    skillNames: { tier1: 'Listening Clues', tier2: 'Main Idea & Details', tier3: 'Tone & Inference' },
+    skillDesc: 'Understanding spoken clues, main ideas, and inference.',
+  },
+  {
+    index: 9,
+    topicSlug: 'speaking-lodge',
+    topicNames: { tier1: 'Speaking Lodge', tier2: 'Story Lodge', tier3: 'Essay Lodge' },
+    topicDesc: 'Pondok salju untuk melatih ekspresi, cerita, dan penulisan.',
+    skillSlug: 'speaking',
+    skillNames: { tier1: 'Simple Sentences', tier2: 'Story & Transitions', tier3: 'Thesis & Conciseness' },
+    skillDesc: 'Expressing ideas clearly, logically, and accurately.',
+  },
 ];
 
 // =====================================================
@@ -732,12 +883,16 @@ async function main() {
   let totalQuestions = 0;
 
   for (let grade = 1; grade <= 6; grade++) {
+    const tier = getGradeTier(grade);
+
     for (const { key, subject, nodes, bank } of subjectsToSeed) {
       // Cache topic by slug per grade so we don't upsert the same topic twice
       const topicCache = new Map<string, string>();
       let topicOrder = 0;
 
       for (const node of nodes) {
+        const topicName = node.topicNames[tier];
+        const skillName = node.skillNames[tier];
         let topicId = topicCache.get(node.topicSlug);
 
         if (!topicId) {
@@ -751,14 +906,14 @@ async function main() {
               },
             },
             update: {
-              name: node.topicName,
+              name: topicName,
               description: node.topicDesc,
               orderIndex: topicOrder,
               status: 'PUBLISHED',
             },
             create: {
               subjectId: subject.id,
-              name: node.topicName,
+              name: topicName,
               slug: node.topicSlug,
               description: node.topicDesc,
               gradeLevel: grade,
@@ -778,14 +933,14 @@ async function main() {
             },
           },
           update: {
-            name: node.skillName,
+            name: skillName,
             description: node.skillDesc,
             orderIndex: node.index,
             status: 'PUBLISHED',
           },
           create: {
             topicId,
-            name: node.skillName,
+            name: skillName,
             slug: node.skillSlug,
             description: node.skillDesc,
             orderIndex: node.index,
@@ -801,7 +956,7 @@ async function main() {
           where: { id: lessonId },
           update: {
             skillId: skill.id,
-            title: `${node.skillName} (Grade ${grade})`,
+            title: `${skillName} (Grade ${grade})`,
             slug: lessonSlug,
             description: `${node.skillDesc} — Primary Grade ${grade}.`,
             orderIndex: 1,
@@ -811,7 +966,7 @@ async function main() {
           create: {
             id: lessonId,
             skillId: skill.id,
-            title: `${node.skillName} (Grade ${grade})`,
+            title: `${skillName} (Grade ${grade})`,
             slug: lessonSlug,
             description: `${node.skillDesc} — Primary Grade ${grade}.`,
             orderIndex: 1,

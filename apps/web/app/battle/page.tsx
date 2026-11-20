@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import "./battle.css";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -19,6 +19,11 @@ import {
   getRegion,
   type SubjectKey,
 } from "../lib/regions";
+import {
+  type AppLocale,
+  getStoredLocale,
+  UI_TEXT,
+} from "../lib/i18n";
 
 interface Option {
   id: string;
@@ -40,11 +45,11 @@ interface SessionStats {
 }
 
 function BattlePageContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const subject = searchParams.get("subject") || "math";
   const subjectKey: SubjectKey = subject === "english" ? "english" : "math";
 
-  // Ambil grade dari URL (?grade=6), atau ekstrak dari lessonId (lesson_g6_math_01) sebagai fallback
   const rawLessonId = searchParams.get("lessonId");
   const gradeParam = searchParams.get("grade");
   const parsedGradeParam = gradeParam ? Number(gradeParam) : NaN;
@@ -62,13 +67,17 @@ function BattlePageContent() {
       : `lesson_g${gradeLevel}_math_01`;
   const lessonId = rawLessonId || defaultLessonId;
 
-  // Region (Topic) tempat Node berada, dengan nama dinamis sesuai gradeLevel
   const regionId = searchParams.get("regionId") || DEFAULT_REGION[subjectKey];
   const region = getRegion(regionId, gradeLevel);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-  const [userId, setUserId] = useState<string | null>(null);
+  const [locale] = useState<AppLocale>(() => getStoredLocale());
+  const t = UI_TEXT[locale];
+
+  const [userId] = useState<string | null>(() =>
+    typeof window !== "undefined" ? window.localStorage.getItem("userId") : null,
+  );
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [fetchingNext, setFetchingNext] = useState(false);
 
@@ -78,7 +87,6 @@ function BattlePageContent() {
   const [currentDeliveryId, setCurrentDeliveryId] = useState<string | null>(null);
   const [correctOptionId, setCorrectOptionId] = useState<string | null>(null);
 
-  // Nama region sesuai tier kelas; fallback ke judul lesson dari backend jika region tidak dikenal
   const [regionName, setRegionName] = useState(region?.name ?? "Loading Adventure...");
 
   const [selected, setSelected] = useState<string | null>(null);
@@ -87,52 +95,38 @@ function BattlePageContent() {
   const [completed, setCompleted] = useState(false);
   const [totalXp, setTotalXp] = useState(0);
 
-  // Background dinamis berdasarkan Region (dengan fallback ke background Subject)
   const backgroundImage = getBattleBackground(regionId, subject);
 
-  const playClickSound = useCallback(() => {
+  const playClickSound = () => {
     try {
-      const audio = new Audio('/assets/sounds/click.mp3');
+      const audio = new Audio("/assets/sounds/click.mp3");
       audio.volume = 0.5;
       audio.play().catch(() => {});
-    } catch (e) {}
-  }, []);
+    } catch {}
+  };
 
-  const playCorrectSound = useCallback(() => {
+  const playCorrectSound = () => {
     try {
-      const audio = new Audio('/assets/sounds/correct.mp3');
+      const audio = new Audio("/assets/sounds/correct.mp3");
       audio.volume = 0.6;
       audio.play().catch(() => {});
-    } catch (e) {}
-  }, []);
+    } catch {}
+  };
 
-  const playAbsoluteSound = useCallback(() => {
+  const playAbsoluteSound = () => {
     try {
-      const audio = new Audio('/assets/sounds/absolute.mp3');
+      const audio = new Audio("/assets/sounds/absolute.mp3");
       audio.volume = 0.7;
       audio.play().catch(() => {});
-    } catch (e) {}
-  }, []);
+    } catch {}
+  };
 
-  useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
-    if (storedUserId) {
-      setUserId(storedUserId);
-    } else {
-      window.location.href = "/login";
-    }
-  }, []);
-
-  useEffect(() => {
-    if (region?.name) {
-      setRegionName(region.name);
-    }
-  }, [region?.name]);
-
-  const fetchNextQuestion = useCallback(async (sessionId: string) => {
+  async function fetchNextQuestion(sessionId: string, activeLocale: AppLocale) {
     setFetchingNext(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/questions/lessons/${lessonId}/next?sessionId=${sessionId}`);
+      const res = await fetch(
+        `${API_BASE_URL}/questions/lessons/${lessonId}/next?sessionId=${sessionId}&lang=${activeLocale}`,
+      );
       if (!res.ok) throw new Error("Gagal menarik soal");
 
       const questionData = await res.json();
@@ -151,10 +145,6 @@ function BattlePageContent() {
         const correctOpt = fetchedQuestion.options.find((o: Option) => o.isCorrect === true);
         if (correctOpt) {
           correctId = correctOpt.id;
-        } else {
-          const validAnswers = ["9 apples", "7 potions", "12 coins", "A bird", "wears", "A clock"];
-          const fallbackOpt = fetchedQuestion.options.find((o: Option) => validAnswers.includes(o.text));
-          if (fallbackOpt) correctId = fallbackOpt.id;
         }
       }
       setCorrectOptionId(correctId);
@@ -167,10 +157,15 @@ function BattlePageContent() {
       setFetchingNext(false);
       setLoadingInitial(false);
     }
-  }, [lessonId, API_BASE_URL]);
+  }
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      router.replace("/login");
+      return;
+    }
+
+    let cancelled = false;
 
     async function startSession() {
       try {
@@ -183,25 +178,32 @@ function BattlePageContent() {
         if (!res.ok) throw new Error("Gagal memulai sesi");
 
         const data = await res.json();
+        if (cancelled) return;
+
         setSessionData(data.session);
 
-        // Prioritas: nama region dari config sesuai grade. Kalau region tidak dikenal, pakai judul lesson.
-        if (region) {
+        if (locale !== "en" && data.lesson?.title) {
+          setRegionName(data.lesson.title);
+        } else if (region) {
           setRegionName(region.name);
         } else if (data.lesson) {
           setRegionName(data.lesson.title || "Unknown Region");
         }
 
-        fetchNextQuestion(data.session.id);
+        await fetchNextQuestion(data.session.id, locale);
       } catch (error) {
         console.error("Error starting session:", error);
-        setLoadingInitial(false);
+        if (!cancelled) setLoadingInitial(false);
       }
     }
 
     startSession();
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lessonId, userId, subject, regionId, gradeLevel, API_BASE_URL]);
+  }, [lessonId, userId, subject, regionId, gradeLevel, API_BASE_URL, locale]);
 
   const handleCheck = async () => {
     playClickSound();
@@ -216,7 +218,7 @@ function BattlePageContent() {
         body: JSON.stringify({
           deliveryId: currentDeliveryId,
           answer: selected,
-          timeSpent: 10
+          timeSpent: 10,
         }),
       });
 
@@ -227,7 +229,7 @@ function BattlePageContent() {
           body: JSON.stringify({
             deliveryId: currentDeliveryId,
             answer: selected,
-            timeSpent: 10
+            timeSpent: 10,
           }),
         });
       }
@@ -237,28 +239,24 @@ function BattlePageContent() {
       const attemptResult = await res.json();
       isCorrect = attemptResult.correct === true;
 
-      setSessionData((prev) => prev ? {
-        ...prev,
-        answeredQuestions: attemptResult.session?.answeredQuestions ?? (prev.answeredQuestions + 1)
-      } : null);
+      setSessionData((prev) =>
+        prev
+          ? {
+              ...prev,
+              answeredQuestions:
+                attemptResult.session?.answeredQuestions ?? prev.answeredQuestions + 1,
+            }
+          : null,
+      );
 
       if (attemptResult.lessonCompleted) {
         setTotalXp(attemptResult.session?.earnedXp || 50);
       }
-
     } catch (error) {
-      console.warn("Menggunakan Validasi Smart Fallback karena API bermasalah...", error);
-
-      const selectedOption = currentQuestion.options.find(o => o.id === selected);
-      const validAnswers = ["9 apples", "7 potions", "12 coins", "A bird", "wears", "A clock"];
-
-      if (selectedOption && validAnswers.includes(selectedOption.text)) {
-        isCorrect = true;
-      } else {
-        isCorrect = false;
-      }
-
-      setSessionData((prev) => prev ? { ...prev, answeredQuestions: prev.answeredQuestions + 1 } : null);
+      console.warn("API validasi bermasalah:", error);
+      setSessionData((prev) =>
+        prev ? { ...prev, answeredQuestions: prev.answeredQuestions + 1 } : null,
+      );
     }
 
     if (isCorrect) playCorrectSound();
@@ -275,34 +273,33 @@ function BattlePageContent() {
       setCompleted(true);
       playAbsoluteSound();
     } else {
-      fetchNextQuestion(sessionData.id);
+      fetchNextQuestion(sessionData.id, locale);
     }
   };
 
   if (loadingInitial) {
     return (
       <div className="flex h-[100dvh] items-center justify-center bg-[#e4f8ff] font-bold text-[#0c347a] text-xl">
-        <Sparkles className="mr-2 animate-pulse" /> Loading your adventure...
+        <Sparkles className="mr-2 animate-pulse" /> {t.battle.loadingAdventure}
       </div>
     );
   }
 
   const answered = sessionData?.answeredQuestions || 0;
-  const target = sessionData?.targetQuestions || 10;
+  const target = sessionData?.targetQuestions || 12;
   const progressPercentage = ((answered + 1) / target) * 100;
 
-  // Deteksi jika soal cukup panjang
   const isLongPrompt = currentQuestion ? currentQuestion.prompt.length > 30 : false;
 
   return (
-    <main
-      className="battle-screen"
-      style={{ backgroundImage }}
-    >
+    <main className="battle-screen" style={{ backgroundImage }}>
       <div className="battle-container">
         <header className="battle-header-split">
           <button
-            onClick={() => { playClickSound(); window.location.href = "/dashboard"; }}
+            onClick={() => {
+              playClickSound();
+              router.push("/dashboard");
+            }}
             className="header-close-btn"
           >
             <X size={22} strokeWidth={3.5} />
@@ -337,13 +334,13 @@ function BattlePageContent() {
         <section className="battle-content">
           <div className="region-badge">
             <Sparkles size={15} />
-            <span>Lock in, you&apos;ve got this! ✨</span>
+            <span>{t.battle.lockIn}</span>
           </div>
 
           {fetchingNext ? (
-             <div className="question-area flex justify-center items-center h-[200px]">
-               <span className="text-[#0c347a] font-bold animate-pulse">Loading next question...</span>
-             </div>
+            <div className="question-area flex justify-center items-center h-[200px]">
+              <span className="text-[#0c347a] font-bold animate-pulse">{t.battle.loadingNext}</span>
+            </div>
           ) : currentQuestion ? (
             <>
               <div className="question-area">
@@ -351,19 +348,17 @@ function BattlePageContent() {
                   key={currentQuestion.id}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  // Memangkas padding secara inline jika soalnya panjang agar kotak putih tidak bengkak
                   className={`question-card ${isLongPrompt ? "py-4 md:py-6" : ""}`}
                 >
                   <div className="question-counter">
-                    QUESTION {Math.min(answered + 1, target)}
+                    {t.battle.questionLabel} {Math.min(answered + 1, target)}
                   </div>
 
-                  {/* Pengecilan ukuran font yang signifikan khusus soal panjang */}
                   <h1 className={`${isLongPrompt ? "!text-xl md:!text-2xl" : ""} font-black text-[#0c347a]`}>
                     {currentQuestion.prompt}
                   </h1>
 
-                  <p>Choose the correct answer below!</p>
+                  <p>{t.battle.chooseAnswer}</p>
                 </motion.div>
                 <Star className="floating-star star-left" fill="#ffc83d" />
                 <Sparkles className="floating-star star-right" />
@@ -396,7 +391,6 @@ function BattlePageContent() {
                       className={`answer-button ${stateClass}`}
                     >
                       <span className="answer-letter">{String.fromCharCode(65 + index)}</span>
-                      {/* Teks Opsi juga dikecilkan jika soal ceritanya panjang */}
                       <span className={`answer-text ${isLongPrompt ? "text-lg md:text-xl font-bold" : ""}`}>
                         {option.text}
                       </span>
@@ -410,7 +404,7 @@ function BattlePageContent() {
 
           <div className="game-hint">
             <Sparkles size={15} />
-            <span>Take your time, little explorer!</span>
+            <span>{t.battle.takeYourTime}</span>
           </div>
         </section>
 
@@ -420,7 +414,7 @@ function BattlePageContent() {
             onClick={handleCheck}
             className="check-button"
           >
-            CHECK ANSWER
+            {t.battle.checkAnswer}
             <ArrowRight size={21} strokeWidth={3} />
           </button>
         </footer>
@@ -439,15 +433,15 @@ function BattlePageContent() {
                   {feedback === "correct" ? <Sparkles size={30} /> : <Heart size={30} />}
                 </div>
                 <div className="feedback-copy">
-                  <h2>{feedback === "correct" ? "Awesome! 🎉" : "Not quite right!"}</h2>
+                  <h2>{feedback === "correct" ? t.battle.awesome : t.battle.notQuiteRight}</h2>
                   <p>
                     {feedback === "correct"
-                      ? "You cooked with that answer! Keep it up."
-                      : `No worries! Let's try another one.`}
+                      ? t.battle.correctDesc
+                      : t.battle.incorrectDesc}
                   </p>
                 </div>
                 <button onClick={handleContinue} className="feedback-button">
-                  {feedback === "correct" ? "CONTINUE" : "GOT IT"}
+                  {feedback === "correct" ? t.battle.continueBtn : t.battle.gotItBtn}
                   <ArrowRight size={20} />
                 </button>
               </div>
@@ -460,15 +454,21 @@ function BattlePageContent() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="completion-overlay">
               <div className="completion-card">
                 <div className="completion-star">🏆</div>
-                <h2>Absolute Legend!</h2>
-                <p>You totally aced this adventure!</p>
+                <h2>{t.battle.legendTitle}</h2>
+                <p>{t.battle.legendDesc}</p>
                 {totalXp > 0 && (
                   <motion.p className="text-[#259b60] text-xl font-bold mb-4">
-                    +{totalXp} XP Earned! ✨
+                    +{totalXp} {t.battle.xpEarned}
                   </motion.p>
                 )}
-                <button onClick={() => { playClickSound(); window.location.href = "/dashboard"; }} className="check-button">
-                  BACK TO DASHBOARD
+                <button
+                  onClick={() => {
+                    playClickSound();
+                    router.push("/dashboard");
+                  }}
+                  className="check-button"
+                >
+                  {t.battle.backToDashboard}
                   <ArrowRight size={20} />
                 </button>
               </div>

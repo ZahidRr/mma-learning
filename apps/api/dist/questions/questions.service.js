@@ -11,6 +11,19 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { AdaptiveService, } from '../adaptive/adaptive.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { generateAdditionWithinLimit } from './generators/addition-within-limit.generator.js';
+function normalizeLocale(lang) {
+    if (lang === 'id' || lang === 'zh')
+        return lang;
+    return 'en';
+}
+function resolveLocalizedText(fallback, translations, locale, field) {
+    if (locale === 'en' || !translations || typeof translations !== 'object') {
+        return fallback;
+    }
+    const byLang = translations[locale];
+    const value = byLang?.[field];
+    return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+}
 let QuestionsService = class QuestionsService {
     prisma;
     adaptiveService;
@@ -18,12 +31,13 @@ let QuestionsService = class QuestionsService {
         this.prisma = prisma;
         this.adaptiveService = adaptiveService;
     }
-    async getLessonQuestions(lessonId, userId) {
+    async getLessonQuestions(lessonId, userId, lang) {
         if (!userId) {
             throw new BadRequestException('userId query parameter is required');
         }
         const lesson = await this.getPublishedLesson(lessonId);
-        await this.validateActiveUser(userId);
+        const user = await this.validateActiveUser(userId);
+        const locale = normalizeLocale(lang ?? user.learnerProfile?.preferredLanguage);
         const adaptive = await this.adaptiveService.getAdaptiveDifficulty({
             userId,
             skillId: lesson.skillId,
@@ -32,23 +46,26 @@ let QuestionsService = class QuestionsService {
         const { selectedDifficulty, selectedQuestions } = this.selectQuestionsByDifficulty(questions, adaptive.targetDifficulty);
         const playableQuestions = [];
         for (const question of selectedQuestions) {
-            const playableQuestion = await this.buildPlayableQuestion(question);
+            const playableQuestion = await this.buildPlayableQuestion(question, locale);
             playableQuestions.push(playableQuestion);
         }
         return {
             lesson: {
                 id: lesson.id,
-                title: lesson.title,
-                description: lesson.description,
+                title: resolveLocalizedText(lesson.title, lesson.translations, locale, 'title'),
+                description: lesson.description
+                    ? resolveLocalizedText(lesson.description, lesson.translations, locale, 'description')
+                    : null,
                 xpReward: lesson.xpReward,
                 skillId: lesson.skillId,
             },
+            locale,
             adaptive,
             selectedDifficulty,
             questions: playableQuestions,
         };
     }
-    async getNextQuestion(lessonId, sessionId) {
+    async getNextQuestion(lessonId, sessionId, lang) {
         if (!sessionId) {
             throw new BadRequestException('sessionId query parameter is required');
         }
@@ -80,7 +97,8 @@ let QuestionsService = class QuestionsService {
         if (session.answeredQuestions >= session.targetQuestions) {
             throw new BadRequestException('Lesson session has reached its question limit');
         }
-        await this.validateActiveUser(session.userId);
+        const user = await this.validateActiveUser(session.userId);
+        const locale = normalizeLocale(lang ?? user.learnerProfile?.preferredLanguage);
         const existingDelivery = await this.prisma.questionDelivery.findFirst({
             where: {
                 lessonSessionId: session.id,
@@ -98,7 +116,7 @@ let QuestionsService = class QuestionsService {
             orderBy: { presentedAt: 'desc' },
         });
         if (existingDelivery) {
-            const playableQuestion = this.buildQuestionFromDelivery(existingDelivery);
+            const playableQuestion = this.buildQuestionFromDelivery(existingDelivery, locale);
             const adaptive = await this.adaptiveService.getAdaptiveDifficulty({
                 userId: session.userId,
                 skillId: lesson.skillId,
@@ -106,10 +124,11 @@ let QuestionsService = class QuestionsService {
             return {
                 lesson: {
                     id: lesson.id,
-                    title: lesson.title,
+                    title: resolveLocalizedText(lesson.title, lesson.translations, locale, 'title'),
                     skillId: lesson.skillId,
                     xpReward: lesson.xpReward,
                 },
+                locale,
                 session: {
                     id: session.id,
                     targetQuestions: session.targetQuestions,
@@ -132,7 +151,7 @@ let QuestionsService = class QuestionsService {
         const questions = await this.getPublishedQuestions(lessonId);
         const { selectedDifficulty, selectedQuestions } = this.selectQuestionsByDifficulty(questions, adaptive.targetDifficulty);
         const selectedQuestion = this.pickRandomQuestion(selectedQuestions);
-        const playableQuestion = await this.buildPlayableQuestion(selectedQuestion);
+        const playableQuestion = await this.buildPlayableQuestion(selectedQuestion, locale);
         const delivery = await this.prisma.questionDelivery.create({
             data: {
                 lessonSessionId: session.id,
@@ -144,10 +163,11 @@ let QuestionsService = class QuestionsService {
         return {
             lesson: {
                 id: lesson.id,
-                title: lesson.title,
+                title: resolveLocalizedText(lesson.title, lesson.translations, locale, 'title'),
                 skillId: lesson.skillId,
                 xpReward: lesson.xpReward,
             },
+            locale,
             session: {
                 id: session.id,
                 targetQuestions: session.targetQuestions,
@@ -170,6 +190,7 @@ let QuestionsService = class QuestionsService {
                 id: true,
                 title: true,
                 description: true,
+                translations: true,
                 xpReward: true,
                 skillId: true,
             },
@@ -182,7 +203,15 @@ let QuestionsService = class QuestionsService {
     async validateActiveUser(userId) {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
-            select: { id: true, status: true },
+            select: {
+                id: true,
+                status: true,
+                learnerProfile: {
+                    select: {
+                        preferredLanguage: true,
+                    },
+                },
+            },
         });
         if (!user || user.status !== 'ACTIVE') {
             throw new NotFoundException('Active user not found');
@@ -230,7 +259,7 @@ let QuestionsService = class QuestionsService {
         const randomIndex = Math.floor(Math.random() * questions.length);
         return questions[randomIndex];
     }
-    async buildPlayableQuestion(question) {
+    async buildPlayableQuestion(question, locale) {
         if (question.source === 'PARAMETERIZED') {
             return this.buildParameterizedQuestion(question);
         }
@@ -242,17 +271,17 @@ let QuestionsService = class QuestionsService {
             source: question.source,
             format: question.format,
             difficulty: question.difficulty,
-            prompt: question.prompt,
+            prompt: resolveLocalizedText(question.prompt, question.translations, locale, 'prompt'),
             options: question.type === 'MULTIPLE_CHOICE'
                 ? question.options.map((option) => ({
                     id: option.id,
-                    text: option.text,
+                    text: resolveLocalizedText(option.text, option.translations, locale, 'text'),
                     orderIndex: option.orderIndex,
                 }))
                 : [],
         };
     }
-    buildQuestionFromDelivery(delivery) {
+    buildQuestionFromDelivery(delivery, locale) {
         const question = delivery.question;
         if (question.source === 'PARAMETERIZED' && delivery.generatedQuestion) {
             const correctVal = parseInt(delivery.generatedQuestion.correctAnswer, 10);
@@ -293,11 +322,11 @@ let QuestionsService = class QuestionsService {
             source: question.source,
             format: question.format,
             difficulty: question.difficulty,
-            prompt: question.prompt,
+            prompt: resolveLocalizedText(question.prompt, question.translations, locale, 'prompt'),
             options: question.type === 'MULTIPLE_CHOICE'
                 ? question.options.map((option) => ({
                     id: option.id,
-                    text: option.text,
+                    text: resolveLocalizedText(option.text, option.translations, locale, 'text'),
                     orderIndex: option.orderIndex,
                 }))
                 : [],

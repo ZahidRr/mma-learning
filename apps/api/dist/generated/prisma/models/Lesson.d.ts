@@ -47,6 +47,7 @@ export type LessonCountAggregateOutputType = {
     title: number;
     slug: number;
     description: number;
+    translations: number;
     orderIndex: number;
     xpReward: number;
     status: number;
@@ -92,6 +93,7 @@ export type LessonCountAggregateInputType = {
     title?: true;
     slug?: true;
     description?: true;
+    translations?: true;
     orderIndex?: true;
     xpReward?: true;
     status?: true;
@@ -133,6 +135,7 @@ export type LessonGroupByOutputType = {
     title: string;
     slug: string;
     description: string | null;
+    translations: runtime.JsonValue | null;
     orderIndex: number;
     xpReward: number;
     status: $Enums.ContentStatus;
@@ -156,6 +159,7 @@ export type LessonWhereInput = {
     title?: Prisma.StringFilter<"Lesson"> | string;
     slug?: Prisma.StringFilter<"Lesson"> | string;
     description?: Prisma.StringNullableFilter<"Lesson"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Lesson">;
     orderIndex?: Prisma.IntFilter<"Lesson"> | number;
     xpReward?: Prisma.IntFilter<"Lesson"> | number;
     status?: Prisma.EnumContentStatusFilter<"Lesson"> | $Enums.ContentStatus;
@@ -171,6 +175,7 @@ export type LessonOrderByWithRelationInput = {
     title?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrderInput | Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     xpReward?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -190,6 +195,7 @@ export type LessonWhereUniqueInput = Prisma.AtLeast<{
     title?: Prisma.StringFilter<"Lesson"> | string;
     slug?: Prisma.StringFilter<"Lesson"> | string;
     description?: Prisma.StringNullableFilter<"Lesson"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Lesson">;
     orderIndex?: Prisma.IntFilter<"Lesson"> | number;
     xpReward?: Prisma.IntFilter<"Lesson"> | number;
     status?: Prisma.EnumContentStatusFilter<"Lesson"> | $Enums.ContentStatus;
@@ -205,6 +211,7 @@ export type LessonOrderByWithAggregationInput = {
     title?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrderInput | Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     xpReward?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -225,6 +232,7 @@ export type LessonScalarWhereWithAggregatesInput = {
     title?: Prisma.StringWithAggregatesFilter<"Lesson"> | string;
     slug?: Prisma.StringWithAggregatesFilter<"Lesson"> | string;
     description?: Prisma.StringNullableWithAggregatesFilter<"Lesson"> | string | null;
+    translations?: Prisma.JsonNullableWithAggregatesFilter<"Lesson">;
     orderIndex?: Prisma.IntWithAggregatesFilter<"Lesson"> | number;
     xpReward?: Prisma.IntWithAggregatesFilter<"Lesson"> | number;
     status?: Prisma.EnumContentStatusWithAggregatesFilter<"Lesson"> | $Enums.ContentStatus;
@@ -236,6 +244,7 @@ export type LessonCreateInput = {
     title: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     xpReward?: number;
     status?: $Enums.ContentStatus;
@@ -251,6 +260,7 @@ export type LessonUncheckedCreateInput = {
     title: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     xpReward?: number;
     status?: $Enums.ContentStatus;
@@ -264,6 +274,7 @@ export type LessonUpdateInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     xpReward?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -279,6 +290,7 @@ export type LessonUncheckedUpdateInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     xpReward?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -293,6 +305,7 @@ export type LessonCreateManyInput = {
     title: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     xpReward?: number;
     status?: $Enums.ContentStatus;
@@ -304,6 +317,7 @@ export type LessonUpdateManyMutationInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     xpReward?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -316,6 +330,7 @@ export type LessonUncheckedUpdateManyInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     xpReward?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -340,6 +355,7 @@ export type LessonCountOrderByAggregateInput = {
     title?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrder;
+    translations?: Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     xpReward?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -449,6 +465,7 @@ export type LessonCreateWithoutSkillInput = {
     title: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     xpReward?: number;
     status?: $Enums.ContentStatus;
@@ -462,6 +479,7 @@ export type LessonUncheckedCreateWithoutSkillInput = {
     title: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     xpReward?: number;
     status?: $Enums.ContentStatus;
@@ -500,6 +518,7 @@ export type LessonScalarWhereInput = {
     title?: Prisma.StringFilter<"Lesson"> | string;
     slug?: Prisma.StringFilter<"Lesson"> | string;
     description?: Prisma.StringNullableFilter<"Lesson"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Lesson">;
     orderIndex?: Prisma.IntFilter<"Lesson"> | number;
     xpReward?: Prisma.IntFilter<"Lesson"> | number;
     status?: Prisma.EnumContentStatusFilter<"Lesson"> | $Enums.ContentStatus;
@@ -511,6 +530,7 @@ export type LessonCreateWithoutQuestionsInput = {
     title: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     xpReward?: number;
     status?: $Enums.ContentStatus;
@@ -525,6 +545,7 @@ export type LessonUncheckedCreateWithoutQuestionsInput = {
     title: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     xpReward?: number;
     status?: $Enums.ContentStatus;
@@ -550,6 +571,7 @@ export type LessonUpdateWithoutQuestionsInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     xpReward?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -564,6 +586,7 @@ export type LessonUncheckedUpdateWithoutQuestionsInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     xpReward?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -576,6 +599,7 @@ export type LessonCreateWithoutSessionsInput = {
     title: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     xpReward?: number;
     status?: $Enums.ContentStatus;
@@ -590,6 +614,7 @@ export type LessonUncheckedCreateWithoutSessionsInput = {
     title: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     xpReward?: number;
     status?: $Enums.ContentStatus;
@@ -615,6 +640,7 @@ export type LessonUpdateWithoutSessionsInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     xpReward?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -629,6 +655,7 @@ export type LessonUncheckedUpdateWithoutSessionsInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     xpReward?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -641,6 +668,7 @@ export type LessonCreateManySkillInput = {
     title: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     xpReward?: number;
     status?: $Enums.ContentStatus;
@@ -652,6 +680,7 @@ export type LessonUpdateWithoutSkillInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     xpReward?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -665,6 +694,7 @@ export type LessonUncheckedUpdateWithoutSkillInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     xpReward?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -678,6 +708,7 @@ export type LessonUncheckedUpdateManyWithoutSkillInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     xpReward?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -707,6 +738,7 @@ export type LessonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     title?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     orderIndex?: boolean;
     xpReward?: boolean;
     status?: boolean;
@@ -723,6 +755,7 @@ export type LessonSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
     title?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     orderIndex?: boolean;
     xpReward?: boolean;
     status?: boolean;
@@ -736,6 +769,7 @@ export type LessonSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
     title?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     orderIndex?: boolean;
     xpReward?: boolean;
     status?: boolean;
@@ -749,13 +783,14 @@ export type LessonSelectScalar = {
     title?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     orderIndex?: boolean;
     xpReward?: boolean;
     status?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type LessonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "skillId" | "title" | "slug" | "description" | "orderIndex" | "xpReward" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["lesson"]>;
+export type LessonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "skillId" | "title" | "slug" | "description" | "translations" | "orderIndex" | "xpReward" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["lesson"]>;
 export type LessonInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     skill?: boolean | Prisma.SkillDefaultArgs<ExtArgs>;
     questions?: boolean | Prisma.Lesson$questionsArgs<ExtArgs>;
@@ -781,6 +816,7 @@ export type $LessonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
         title: string;
         slug: string;
         description: string | null;
+        translations: runtime.JsonValue | null;
         orderIndex: number;
         xpReward: number;
         status: $Enums.ContentStatus;
@@ -851,6 +887,7 @@ export interface LessonFieldRefs {
     readonly title: Prisma.FieldRef<"Lesson", 'String'>;
     readonly slug: Prisma.FieldRef<"Lesson", 'String'>;
     readonly description: Prisma.FieldRef<"Lesson", 'String'>;
+    readonly translations: Prisma.FieldRef<"Lesson", 'Json'>;
     readonly orderIndex: Prisma.FieldRef<"Lesson", 'Int'>;
     readonly xpReward: Prisma.FieldRef<"Lesson", 'Int'>;
     readonly status: Prisma.FieldRef<"Lesson", 'ContentStatus'>;

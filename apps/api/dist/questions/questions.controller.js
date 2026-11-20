@@ -17,27 +17,29 @@ let QuestionsController = class QuestionsController {
     constructor(questionsService) {
         this.questionsService = questionsService;
     }
-    getLessonQuestions(lessonId, userId) {
-        return this.questionsService.getLessonQuestions(lessonId, userId);
+    getLessonQuestions(lessonId, userId, lang) {
+        return this.questionsService.getLessonQuestions(lessonId, userId, lang);
     }
-    getNextQuestion(lessonId, sessionId) {
-        return this.questionsService.getNextQuestion(lessonId, sessionId);
+    getNextQuestion(lessonId, sessionId, lang) {
+        return this.questionsService.getNextQuestion(lessonId, sessionId, lang);
     }
 };
 __decorate([
     Get('lessons/:lessonId'),
     __param(0, Param('lessonId')),
     __param(1, Query('userId')),
+    __param(2, Query('lang')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", void 0)
 ], QuestionsController.prototype, "getLessonQuestions", null);
 __decorate([
     Get('lessons/:lessonId/next'),
     __param(0, Param('lessonId')),
     __param(1, Query('sessionId')),
+    __param(2, Query('lang')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", void 0)
 ], QuestionsController.prototype, "getNextQuestion", null);
 QuestionsController = __decorate([

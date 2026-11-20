@@ -22,6 +22,7 @@ export type LearnerProfileMinAggregateOutputType = {
     displayName: string | null;
     gradeLevel: number | null;
     avatarKey: string | null;
+    preferredLanguage: string | null;
     totalXp: number | null;
     createdAt: Date | null;
     updatedAt: Date | null;
@@ -32,6 +33,7 @@ export type LearnerProfileMaxAggregateOutputType = {
     displayName: string | null;
     gradeLevel: number | null;
     avatarKey: string | null;
+    preferredLanguage: string | null;
     totalXp: number | null;
     createdAt: Date | null;
     updatedAt: Date | null;
@@ -42,6 +44,7 @@ export type LearnerProfileCountAggregateOutputType = {
     displayName: number;
     gradeLevel: number;
     avatarKey: number;
+    preferredLanguage: number;
     totalXp: number;
     createdAt: number;
     updatedAt: number;
@@ -61,6 +64,7 @@ export type LearnerProfileMinAggregateInputType = {
     displayName?: true;
     gradeLevel?: true;
     avatarKey?: true;
+    preferredLanguage?: true;
     totalXp?: true;
     createdAt?: true;
     updatedAt?: true;
@@ -71,6 +75,7 @@ export type LearnerProfileMaxAggregateInputType = {
     displayName?: true;
     gradeLevel?: true;
     avatarKey?: true;
+    preferredLanguage?: true;
     totalXp?: true;
     createdAt?: true;
     updatedAt?: true;
@@ -81,6 +86,7 @@ export type LearnerProfileCountAggregateInputType = {
     displayName?: true;
     gradeLevel?: true;
     avatarKey?: true;
+    preferredLanguage?: true;
     totalXp?: true;
     createdAt?: true;
     updatedAt?: true;
@@ -120,6 +126,7 @@ export type LearnerProfileGroupByOutputType = {
     displayName: string;
     gradeLevel: number;
     avatarKey: string | null;
+    preferredLanguage: string;
     totalXp: number;
     createdAt: Date;
     updatedAt: Date;
@@ -141,6 +148,7 @@ export type LearnerProfileWhereInput = {
     displayName?: Prisma.StringFilter<"LearnerProfile"> | string;
     gradeLevel?: Prisma.IntFilter<"LearnerProfile"> | number;
     avatarKey?: Prisma.StringNullableFilter<"LearnerProfile"> | string | null;
+    preferredLanguage?: Prisma.StringFilter<"LearnerProfile"> | string;
     totalXp?: Prisma.IntFilter<"LearnerProfile"> | number;
     createdAt?: Prisma.DateTimeFilter<"LearnerProfile"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"LearnerProfile"> | Date | string;
@@ -152,6 +160,7 @@ export type LearnerProfileOrderByWithRelationInput = {
     displayName?: Prisma.SortOrder;
     gradeLevel?: Prisma.SortOrder;
     avatarKey?: Prisma.SortOrderInput | Prisma.SortOrder;
+    preferredLanguage?: Prisma.SortOrder;
     totalXp?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
@@ -166,6 +175,7 @@ export type LearnerProfileWhereUniqueInput = Prisma.AtLeast<{
     displayName?: Prisma.StringFilter<"LearnerProfile"> | string;
     gradeLevel?: Prisma.IntFilter<"LearnerProfile"> | number;
     avatarKey?: Prisma.StringNullableFilter<"LearnerProfile"> | string | null;
+    preferredLanguage?: Prisma.StringFilter<"LearnerProfile"> | string;
     totalXp?: Prisma.IntFilter<"LearnerProfile"> | number;
     createdAt?: Prisma.DateTimeFilter<"LearnerProfile"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"LearnerProfile"> | Date | string;
@@ -177,6 +187,7 @@ export type LearnerProfileOrderByWithAggregationInput = {
     displayName?: Prisma.SortOrder;
     gradeLevel?: Prisma.SortOrder;
     avatarKey?: Prisma.SortOrderInput | Prisma.SortOrder;
+    preferredLanguage?: Prisma.SortOrder;
     totalXp?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
@@ -195,6 +206,7 @@ export type LearnerProfileScalarWhereWithAggregatesInput = {
     displayName?: Prisma.StringWithAggregatesFilter<"LearnerProfile"> | string;
     gradeLevel?: Prisma.IntWithAggregatesFilter<"LearnerProfile"> | number;
     avatarKey?: Prisma.StringNullableWithAggregatesFilter<"LearnerProfile"> | string | null;
+    preferredLanguage?: Prisma.StringWithAggregatesFilter<"LearnerProfile"> | string;
     totalXp?: Prisma.IntWithAggregatesFilter<"LearnerProfile"> | number;
     createdAt?: Prisma.DateTimeWithAggregatesFilter<"LearnerProfile"> | Date | string;
     updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LearnerProfile"> | Date | string;
@@ -204,6 +216,7 @@ export type LearnerProfileCreateInput = {
     displayName: string;
     gradeLevel: number;
     avatarKey?: string | null;
+    preferredLanguage?: string;
     totalXp?: number;
     createdAt?: Date | string;
     updatedAt?: Date | string;
@@ -215,6 +228,7 @@ export type LearnerProfileUncheckedCreateInput = {
     displayName: string;
     gradeLevel: number;
     avatarKey?: string | null;
+    preferredLanguage?: string;
     totalXp?: number;
     createdAt?: Date | string;
     updatedAt?: Date | string;
@@ -224,6 +238,7 @@ export type LearnerProfileUpdateInput = {
     displayName?: Prisma.StringFieldUpdateOperationsInput | string;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     avatarKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    preferredLanguage?: Prisma.StringFieldUpdateOperationsInput | string;
     totalXp?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -235,6 +250,7 @@ export type LearnerProfileUncheckedUpdateInput = {
     displayName?: Prisma.StringFieldUpdateOperationsInput | string;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     avatarKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    preferredLanguage?: Prisma.StringFieldUpdateOperationsInput | string;
     totalXp?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -245,6 +261,7 @@ export type LearnerProfileCreateManyInput = {
     displayName: string;
     gradeLevel: number;
     avatarKey?: string | null;
+    preferredLanguage?: string;
     totalXp?: number;
     createdAt?: Date | string;
     updatedAt?: Date | string;
@@ -254,6 +271,7 @@ export type LearnerProfileUpdateManyMutationInput = {
     displayName?: Prisma.StringFieldUpdateOperationsInput | string;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     avatarKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    preferredLanguage?: Prisma.StringFieldUpdateOperationsInput | string;
     totalXp?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -264,6 +282,7 @@ export type LearnerProfileUncheckedUpdateManyInput = {
     displayName?: Prisma.StringFieldUpdateOperationsInput | string;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     avatarKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    preferredLanguage?: Prisma.StringFieldUpdateOperationsInput | string;
     totalXp?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -278,6 +297,7 @@ export type LearnerProfileCountOrderByAggregateInput = {
     displayName?: Prisma.SortOrder;
     gradeLevel?: Prisma.SortOrder;
     avatarKey?: Prisma.SortOrder;
+    preferredLanguage?: Prisma.SortOrder;
     totalXp?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
@@ -292,6 +312,7 @@ export type LearnerProfileMaxOrderByAggregateInput = {
     displayName?: Prisma.SortOrder;
     gradeLevel?: Prisma.SortOrder;
     avatarKey?: Prisma.SortOrder;
+    preferredLanguage?: Prisma.SortOrder;
     totalXp?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
@@ -302,6 +323,7 @@ export type LearnerProfileMinOrderByAggregateInput = {
     displayName?: Prisma.SortOrder;
     gradeLevel?: Prisma.SortOrder;
     avatarKey?: Prisma.SortOrder;
+    preferredLanguage?: Prisma.SortOrder;
     totalXp?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
@@ -353,6 +375,7 @@ export type LearnerProfileCreateWithoutUserInput = {
     displayName: string;
     gradeLevel: number;
     avatarKey?: string | null;
+    preferredLanguage?: string;
     totalXp?: number;
     createdAt?: Date | string;
     updatedAt?: Date | string;
@@ -362,6 +385,7 @@ export type LearnerProfileUncheckedCreateWithoutUserInput = {
     displayName: string;
     gradeLevel: number;
     avatarKey?: string | null;
+    preferredLanguage?: string;
     totalXp?: number;
     createdAt?: Date | string;
     updatedAt?: Date | string;
@@ -384,6 +408,7 @@ export type LearnerProfileUpdateWithoutUserInput = {
     displayName?: Prisma.StringFieldUpdateOperationsInput | string;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     avatarKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    preferredLanguage?: Prisma.StringFieldUpdateOperationsInput | string;
     totalXp?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -393,6 +418,7 @@ export type LearnerProfileUncheckedUpdateWithoutUserInput = {
     displayName?: Prisma.StringFieldUpdateOperationsInput | string;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     avatarKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    preferredLanguage?: Prisma.StringFieldUpdateOperationsInput | string;
     totalXp?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -403,6 +429,7 @@ export type LearnerProfileSelect<ExtArgs extends runtime.Types.Extensions.Intern
     displayName?: boolean;
     gradeLevel?: boolean;
     avatarKey?: boolean;
+    preferredLanguage?: boolean;
     totalXp?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
@@ -414,6 +441,7 @@ export type LearnerProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Type
     displayName?: boolean;
     gradeLevel?: boolean;
     avatarKey?: boolean;
+    preferredLanguage?: boolean;
     totalXp?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
@@ -425,6 +453,7 @@ export type LearnerProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
     displayName?: boolean;
     gradeLevel?: boolean;
     avatarKey?: boolean;
+    preferredLanguage?: boolean;
     totalXp?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
@@ -436,11 +465,12 @@ export type LearnerProfileSelectScalar = {
     displayName?: boolean;
     gradeLevel?: boolean;
     avatarKey?: boolean;
+    preferredLanguage?: boolean;
     totalXp?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type LearnerProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "displayName" | "gradeLevel" | "avatarKey" | "totalXp" | "createdAt" | "updatedAt", ExtArgs["result"]["learnerProfile"]>;
+export type LearnerProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "displayName" | "gradeLevel" | "avatarKey" | "preferredLanguage" | "totalXp" | "createdAt" | "updatedAt", ExtArgs["result"]["learnerProfile"]>;
 export type LearnerProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 };
@@ -461,6 +491,7 @@ export type $LearnerProfilePayload<ExtArgs extends runtime.Types.Extensions.Inte
         displayName: string;
         gradeLevel: number;
         avatarKey: string | null;
+        preferredLanguage: string;
         totalXp: number;
         createdAt: Date;
         updatedAt: Date;
@@ -527,6 +558,7 @@ export interface LearnerProfileFieldRefs {
     readonly displayName: Prisma.FieldRef<"LearnerProfile", 'String'>;
     readonly gradeLevel: Prisma.FieldRef<"LearnerProfile", 'Int'>;
     readonly avatarKey: Prisma.FieldRef<"LearnerProfile", 'String'>;
+    readonly preferredLanguage: Prisma.FieldRef<"LearnerProfile", 'String'>;
     readonly totalXp: Prisma.FieldRef<"LearnerProfile", 'Int'>;
     readonly createdAt: Prisma.FieldRef<"LearnerProfile", 'DateTime'>;
     readonly updatedAt: Prisma.FieldRef<"LearnerProfile", 'DateTime'>;

@@ -14,6 +14,22 @@ type RecordAttemptInput = {
   isCorrect: boolean;
 };
 
+type SupportedLocale = 'en' | 'id' | 'zh';
+
+function resolveLocalizedName(
+  fallback: string,
+  translations: unknown,
+  locale: SupportedLocale,
+  key: 'name' | 'title' = 'name',
+): string {
+  if (locale === 'en' || !translations || typeof translations !== 'object') {
+    return fallback;
+  }
+  const byLang = (translations as Record<string, Record<string, unknown>>)[locale];
+  const val = byLang?.[key];
+  return typeof val === 'string' && val.trim().length > 0 ? val : fallback;
+}
+
 @Injectable()
 export class LessonSessionsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -29,12 +45,21 @@ export class LessonSessionsService {
 
     const user = await this.prisma.user.findUnique({
       where: { id: dto.userId },
-      select: { id: true, status: true },
+      select: {
+        id: true,
+        status: true,
+        learnerProfile: {
+          select: { preferredLanguage: true },
+        },
+      },
     });
 
     if (!user || user.status !== 'ACTIVE') {
       throw new NotFoundException('Active user not found');
     }
+
+    const rawLang = user.learnerProfile?.preferredLanguage;
+    const locale: SupportedLocale = rawLang === 'id' || rawLang === 'zh' ? rawLang : 'en';
 
     // =====================================================
     // 2. CHECK PUBLISHED LESSON & FETCH TOPIC RELATION
@@ -49,15 +74,16 @@ export class LessonSessionsService {
         id: true,
         title: true,
         description: true,
+        translations: true,
         xpReward: true,
         skillId: true,
-        // Menarik relasi Skill -> Topic agar UI mendapat Region Name & Background
         skill: {
           select: {
             topic: {
               select: {
                 name: true,
                 slug: true,
+                translations: true,
               },
             },
           },
@@ -72,17 +98,23 @@ export class LessonSessionsService {
     // =====================================================
     // FORMAT LESSON DATA UNTUK FRONTEND
     // =====================================================
-    // Memanipulasi response agar pas dengan ekspektasi Next.js 
-    // tanpa perlu merombak ulang kode frontend
+
+    const localizedTopicName = lesson.skill?.topic
+      ? resolveLocalizedName(
+          lesson.skill.topic.name,
+          lesson.skill.topic.translations,
+          locale,
+          'name',
+        )
+      : resolveLocalizedName(lesson.title, lesson.translations, locale, 'title');
+
     const frontendLessonData = {
       id: lesson.id,
-      // Frontend memakai 'title' untuk nama Region (Pojok Kiri Atas)
-      title: lesson.skill?.topic?.name || lesson.title, 
+      title: localizedTopicName,
       description: lesson.description,
       xpReward: lesson.xpReward,
-      // Mengonversi slug (misal: "counting-meadow") menjadi "countingmeadowbg.png"
-      bgImageKey: lesson.skill?.topic?.slug 
-        ? `${lesson.skill.topic.slug.replace(/-/g, '')}bg.png` 
+      bgImageKey: lesson.skill?.topic?.slug
+        ? `${lesson.skill.topic.slug.replace(/-/g, '')}bg.png`
         : 'countingmeadowbg.png',
     };
 
@@ -108,14 +140,14 @@ export class LessonSessionsService {
     }
 
     // =====================================================
-    // 4. CREATE NEW SESSION
+    // 4. CREATE NEW SESSION (12 QUESTIONS PER SESSION)
     // =====================================================
 
     const session = await this.prisma.lessonSession.create({
       data: {
         userId: dto.userId,
         lessonId: dto.lessonId,
-        targetQuestions: 10,
+        targetQuestions: 12,
         answeredQuestions: 0,
         correctAnswers: 0,
         earnedXp: 0,
@@ -171,19 +203,11 @@ export class LessonSessionsService {
   // =====================================================
 
   async recordAttempt(input: RecordAttemptInput) {
-    // =====================================================
-    // 1. VALIDATE CURRENT SESSION
-    // =====================================================
-
     const session = await this.validateSessionForAttempt({
       sessionId: input.sessionId,
       userId: input.userId,
       lessonId: input.lessonId,
     });
-
-    // =====================================================
-    // 2. GET LESSON XP
-    // =====================================================
 
     const lesson = await this.prisma.lesson.findUnique({
       where: { id: input.lessonId },
@@ -194,17 +218,9 @@ export class LessonSessionsService {
       throw new NotFoundException('Lesson not found');
     }
 
-    // =====================================================
-    // 3. CALCULATE NEW SESSION PROGRESS
-    // =====================================================
-
     const answeredQuestions = session.answeredQuestions + 1;
     const correctAnswers = session.correctAnswers + (input.isCorrect ? 1 : 0);
     const isCompleted = answeredQuestions >= session.targetQuestions;
-
-    // =====================================================
-    // 4A. NORMAL IN-PROGRESS UPDATE
-    // =====================================================
 
     if (!isCompleted) {
       const updatedSession = await this.prisma.lessonSession.update({
@@ -224,10 +240,6 @@ export class LessonSessionsService {
         totalXp: learnerProfile?.totalXp ?? 0,
       };
     }
-
-    // =====================================================
-    // 4B. COMPLETE SESSION + AWARD XP
-    // =====================================================
 
     const completedAt = new Date();
 
@@ -251,10 +263,6 @@ export class LessonSessionsService {
         select: { id: true, userId: true, totalXp: true },
       }),
     ]);
-
-    // =====================================================
-    // 5. COMPLETION RESPONSE
-    // =====================================================
 
     return {
       ...this.buildSessionResponse(updatedSession),

@@ -24,6 +24,9 @@ let UsersController = class UsersController {
     updateOnboarding(userId, body) {
         return this.usersService.updateOnboardingProfile(userId, body);
     }
+    updateLanguage(userId, body) {
+        return this.usersService.updatePreferredLanguage(userId, body.language);
+    }
 };
 __decorate([
     Post(),
@@ -40,6 +43,14 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "updateOnboarding", null);
+__decorate([
+    Patch(':id/language'),
+    __param(0, Param('id')),
+    __param(1, Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "updateLanguage", null);
 UsersController = __decorate([
     Controller('users'),
     __metadata("design:paramtypes", [UsersService])

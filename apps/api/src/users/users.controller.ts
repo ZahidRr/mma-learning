@@ -18,4 +18,12 @@ export class UsersController {
   ) {
     return this.usersService.updateOnboardingProfile(userId, body);
   }
+
+  @Patch(':id/language')
+  updateLanguage(
+    @Param('id') userId: string,
+    @Body() body: { language: string },
+  ) {
+    return this.usersService.updatePreferredLanguage(userId, body.language);
+  }
 }

@@ -9,6 +9,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 import { BadRequestException, Injectable, NotFoundException, } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+function resolveLocalizedName(fallback, translations, locale, key = 'name') {
+    if (locale === 'en' || !translations || typeof translations !== 'object') {
+        return fallback;
+    }
+    const byLang = translations[locale];
+    const val = byLang?.[key];
+    return typeof val === 'string' && val.trim().length > 0 ? val : fallback;
+}
 let LessonSessionsService = class LessonSessionsService {
     prisma;
     constructor(prisma) {
@@ -17,11 +25,19 @@ let LessonSessionsService = class LessonSessionsService {
     async startSession(dto) {
         const user = await this.prisma.user.findUnique({
             where: { id: dto.userId },
-            select: { id: true, status: true },
+            select: {
+                id: true,
+                status: true,
+                learnerProfile: {
+                    select: { preferredLanguage: true },
+                },
+            },
         });
         if (!user || user.status !== 'ACTIVE') {
             throw new NotFoundException('Active user not found');
         }
+        const rawLang = user.learnerProfile?.preferredLanguage;
+        const locale = rawLang === 'id' || rawLang === 'zh' ? rawLang : 'en';
         const lesson = await this.prisma.lesson.findFirst({
             where: {
                 id: dto.lessonId,
@@ -31,6 +47,7 @@ let LessonSessionsService = class LessonSessionsService {
                 id: true,
                 title: true,
                 description: true,
+                translations: true,
                 xpReward: true,
                 skillId: true,
                 skill: {
@@ -39,6 +56,7 @@ let LessonSessionsService = class LessonSessionsService {
                             select: {
                                 name: true,
                                 slug: true,
+                                translations: true,
                             },
                         },
                     },
@@ -48,9 +66,12 @@ let LessonSessionsService = class LessonSessionsService {
         if (!lesson) {
             throw new NotFoundException('Published lesson not found');
         }
+        const localizedTopicName = lesson.skill?.topic
+            ? resolveLocalizedName(lesson.skill.topic.name, lesson.skill.topic.translations, locale, 'name')
+            : resolveLocalizedName(lesson.title, lesson.translations, locale, 'title');
         const frontendLessonData = {
             id: lesson.id,
-            title: lesson.skill?.topic?.name || lesson.title,
+            title: localizedTopicName,
             description: lesson.description,
             xpReward: lesson.xpReward,
             bgImageKey: lesson.skill?.topic?.slug
@@ -76,7 +97,7 @@ let LessonSessionsService = class LessonSessionsService {
             data: {
                 userId: dto.userId,
                 lessonId: dto.lessonId,
-                targetQuestions: 10,
+                targetQuestions: 12,
                 answeredQuestions: 0,
                 correctAnswers: 0,
                 earnedXp: 0,

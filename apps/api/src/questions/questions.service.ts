@@ -22,6 +22,27 @@ type AdditionConfig = {
   sumMax: number;
 };
 
+type SupportedLocale = 'en' | 'id' | 'zh';
+
+function normalizeLocale(lang?: string | null): SupportedLocale {
+  if (lang === 'id' || lang === 'zh') return lang;
+  return 'en';
+}
+
+function resolveLocalizedText(
+  fallback: string,
+  translations: unknown,
+  locale: SupportedLocale,
+  field: 'prompt' | 'text' | 'title' | 'description',
+): string {
+  if (locale === 'en' || !translations || typeof translations !== 'object') {
+    return fallback;
+  }
+  const byLang = (translations as Record<string, Record<string, unknown>>)[locale];
+  const value = byLang?.[field];
+  return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+}
+
 @Injectable()
 export class QuestionsService {
   constructor(
@@ -33,13 +54,14 @@ export class QuestionsService {
   // GET ALL QUESTIONS FOR LESSON
   // =======================================================
 
-  async getLessonQuestions(lessonId: string, userId: string) {
+  async getLessonQuestions(lessonId: string, userId: string, lang?: string) {
     if (!userId) {
       throw new BadRequestException('userId query parameter is required');
     }
 
     const lesson = await this.getPublishedLesson(lessonId);
-    await this.validateActiveUser(userId);
+    const user = await this.validateActiveUser(userId);
+    const locale = normalizeLocale(lang ?? user.learnerProfile?.preferredLanguage);
 
     const adaptive = await this.adaptiveService.getAdaptiveDifficulty({
       userId,
@@ -55,18 +77,21 @@ export class QuestionsService {
 
     const playableQuestions = [];
     for (const question of selectedQuestions) {
-      const playableQuestion = await this.buildPlayableQuestion(question);
+      const playableQuestion = await this.buildPlayableQuestion(question, locale);
       playableQuestions.push(playableQuestion);
     }
 
     return {
       lesson: {
         id: lesson.id,
-        title: lesson.title,
-        description: lesson.description,
+        title: resolveLocalizedText(lesson.title, lesson.translations, locale, 'title'),
+        description: lesson.description
+          ? resolveLocalizedText(lesson.description, lesson.translations, locale, 'description')
+          : null,
         xpReward: lesson.xpReward,
         skillId: lesson.skillId,
       },
+      locale,
       adaptive,
       selectedDifficulty,
       questions: playableQuestions,
@@ -77,7 +102,7 @@ export class QuestionsService {
   // GET NEXT ADAPTIVE QUESTION USING LESSON SESSION
   // =======================================================
 
-  async getNextQuestion(lessonId: string, sessionId: string) {
+  async getNextQuestion(lessonId: string, sessionId: string, lang?: string) {
     if (!sessionId) {
       throw new BadRequestException('sessionId query parameter is required');
     }
@@ -116,7 +141,8 @@ export class QuestionsService {
       throw new BadRequestException('Lesson session has reached its question limit');
     }
 
-    await this.validateActiveUser(session.userId);
+    const user = await this.validateActiveUser(session.userId);
+    const locale = normalizeLocale(lang ?? user.learnerProfile?.preferredLanguage);
 
     const existingDelivery = await this.prisma.questionDelivery.findFirst({
       where: {
@@ -136,7 +162,7 @@ export class QuestionsService {
     });
 
     if (existingDelivery) {
-      const playableQuestion = this.buildQuestionFromDelivery(existingDelivery);
+      const playableQuestion = this.buildQuestionFromDelivery(existingDelivery, locale);
       const adaptive = await this.adaptiveService.getAdaptiveDifficulty({
         userId: session.userId,
         skillId: lesson.skillId,
@@ -145,10 +171,11 @@ export class QuestionsService {
       return {
         lesson: {
           id: lesson.id,
-          title: lesson.title,
+          title: resolveLocalizedText(lesson.title, lesson.translations, locale, 'title'),
           skillId: lesson.skillId,
           xpReward: lesson.xpReward,
         },
+        locale,
         session: {
           id: session.id,
           targetQuestions: session.targetQuestions,
@@ -181,7 +208,7 @@ export class QuestionsService {
     );
 
     const selectedQuestion = this.pickRandomQuestion(selectedQuestions);
-    const playableQuestion = await this.buildPlayableQuestion(selectedQuestion);
+    const playableQuestion = await this.buildPlayableQuestion(selectedQuestion, locale);
 
     const delivery = await this.prisma.questionDelivery.create({
       data: {
@@ -195,10 +222,11 @@ export class QuestionsService {
     return {
       lesson: {
         id: lesson.id,
-        title: lesson.title,
+        title: resolveLocalizedText(lesson.title, lesson.translations, locale, 'title'),
         skillId: lesson.skillId,
         xpReward: lesson.xpReward,
       },
+      locale,
       session: {
         id: session.id,
         targetQuestions: session.targetQuestions,
@@ -229,6 +257,7 @@ export class QuestionsService {
         id: true,
         title: true,
         description: true,
+        translations: true,
         xpReward: true,
         skillId: true,
       },
@@ -248,7 +277,15 @@ export class QuestionsService {
   private async validateActiveUser(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, status: true },
+      select: {
+        id: true,
+        status: true,
+        learnerProfile: {
+          select: {
+            preferredLanguage: true,
+          },
+        },
+      },
     });
 
     if (!user || user.status !== 'ACTIVE') {
@@ -323,7 +360,7 @@ export class QuestionsService {
   // BUILD PLAYABLE QUESTION
   // =======================================================
 
-  private async buildPlayableQuestion(question: any) {
+  private async buildPlayableQuestion(question: any, locale: SupportedLocale) {
     if (question.source === 'PARAMETERIZED') {
       return this.buildParameterizedQuestion(question);
     }
@@ -336,14 +373,16 @@ export class QuestionsService {
       source: question.source,
       format: question.format,
       difficulty: question.difficulty,
-      prompt: question.prompt,
+      prompt: resolveLocalizedText(question.prompt, question.translations, locale, 'prompt'),
       options:
         question.type === 'MULTIPLE_CHOICE'
-          ? question.options.map((option: { id: string; text: string; orderIndex: number }) => ({
-              id: option.id,
-              text: option.text,
-              orderIndex: option.orderIndex,
-            }))
+          ? question.options.map(
+              (option: { id: string; text: string; translations?: unknown; orderIndex: number }) => ({
+                id: option.id,
+                text: resolveLocalizedText(option.text, option.translations, locale, 'text'),
+                orderIndex: option.orderIndex,
+              }),
+            )
           : [],
     };
   }
@@ -352,13 +391,13 @@ export class QuestionsService {
   // REBUILD QUESTION FROM EXISTING DELIVERY (FIXED OPTIONS)
   // =======================================================
 
-  private buildQuestionFromDelivery(delivery: any) {
+  private buildQuestionFromDelivery(delivery: any, locale: SupportedLocale) {
     const question = delivery.question;
 
     if (question.source === 'PARAMETERIZED' && delivery.generatedQuestion) {
       const correctVal = parseInt(delivery.generatedQuestion.correctAnswer, 10);
       const distractors = new Set<number>();
-      
+
       while (distractors.size < 3) {
         const diff = Math.floor(Math.random() * 7) - 3;
         const fakeVal = correctVal + diff;
@@ -369,20 +408,22 @@ export class QuestionsService {
 
       const allOptionsValues = [correctVal, ...Array.from(distractors)];
       const shuffledValues = allOptionsValues.sort(() => Math.random() - 0.5);
-      
+
       const options = shuffledValues.map((val, index) => ({
         id: `opt_${index}`,
         text: val.toString(),
         orderIndex: index,
       }));
 
-      const correctOptionId = options.find((o) => o.text === delivery.generatedQuestion.correctAnswer)?.id;
+      const correctOptionId = options.find(
+        (o) => o.text === delivery.generatedQuestion.correctAnswer,
+      )?.id;
 
       return {
         id: question.id,
         generatedQuestionId: delivery.generatedQuestion.id,
         skillId: question.skillId,
-        type: 'MULTIPLE_CHOICE', 
+        type: 'MULTIPLE_CHOICE',
         source: question.source,
         format: question.format,
         difficulty: question.difficulty,
@@ -400,20 +441,22 @@ export class QuestionsService {
       source: question.source,
       format: question.format,
       difficulty: question.difficulty,
-      prompt: question.prompt,
+      prompt: resolveLocalizedText(question.prompt, question.translations, locale, 'prompt'),
       options:
         question.type === 'MULTIPLE_CHOICE'
-          ? question.options.map((option: { id: string; text: string; orderIndex: number }) => ({
-              id: option.id,
-              text: option.text,
-              orderIndex: option.orderIndex,
-            }))
+          ? question.options.map(
+              (option: { id: string; text: string; translations?: unknown; orderIndex: number }) => ({
+                id: option.id,
+                text: resolveLocalizedText(option.text, option.translations, locale, 'text'),
+                orderIndex: option.orderIndex,
+              }),
+            )
           : [],
     };
   }
 
   // =======================================================
-  // PARAMETERIZED GENERATOR 
+  // PARAMETERIZED GENERATOR
   // =======================================================
 
   private async buildParameterizedQuestion(question: any) {
@@ -440,7 +483,7 @@ export class QuestionsService {
 
       const correctVal = parseInt(generated.correctAnswer, 10);
       const distractors = new Set<number>();
-      
+
       while (distractors.size < 3) {
         const diff = Math.floor(Math.random() * 7) - 3;
         const fakeVal = correctVal + diff;
@@ -451,7 +494,7 @@ export class QuestionsService {
 
       const allOptionsValues = [correctVal, ...Array.from(distractors)];
       const shuffledValues = allOptionsValues.sort(() => Math.random() - 0.5);
-      
+
       const options = shuffledValues.map((val, index) => ({
         id: `opt_${index}`,
         text: val.toString(),

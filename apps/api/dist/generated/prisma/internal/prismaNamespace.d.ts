@@ -1348,6 +1348,7 @@ export declare const LearnerProfileScalarFieldEnum: {
     readonly displayName: "displayName";
     readonly gradeLevel: "gradeLevel";
     readonly avatarKey: "avatarKey";
+    readonly preferredLanguage: "preferredLanguage";
     readonly totalXp: "totalXp";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
@@ -1369,6 +1370,7 @@ export declare const SubjectScalarFieldEnum: {
     readonly name: "name";
     readonly slug: "slug";
     readonly description: "description";
+    readonly translations: "translations";
     readonly iconKey: "iconKey";
     readonly orderIndex: "orderIndex";
     readonly status: "status";
@@ -1382,6 +1384,7 @@ export declare const TopicScalarFieldEnum: {
     readonly name: "name";
     readonly slug: "slug";
     readonly description: "description";
+    readonly translations: "translations";
     readonly gradeLevel: "gradeLevel";
     readonly orderIndex: "orderIndex";
     readonly status: "status";
@@ -1395,6 +1398,7 @@ export declare const SkillScalarFieldEnum: {
     readonly name: "name";
     readonly slug: "slug";
     readonly description: "description";
+    readonly translations: "translations";
     readonly orderIndex: "orderIndex";
     readonly status: "status";
     readonly createdAt: "createdAt";
@@ -1407,6 +1411,7 @@ export declare const LessonScalarFieldEnum: {
     readonly title: "title";
     readonly slug: "slug";
     readonly description: "description";
+    readonly translations: "translations";
     readonly orderIndex: "orderIndex";
     readonly xpReward: "xpReward";
     readonly status: "status";
@@ -1425,6 +1430,7 @@ export declare const QuestionScalarFieldEnum: {
     readonly difficulty: "difficulty";
     readonly prompt: "prompt";
     readonly explanation: "explanation";
+    readonly translations: "translations";
     readonly answerConfig: "answerConfig";
     readonly orderIndex: "orderIndex";
     readonly status: "status";
@@ -1436,6 +1442,7 @@ export declare const QuestionOptionScalarFieldEnum: {
     readonly id: "id";
     readonly questionId: "questionId";
     readonly text: "text";
+    readonly translations: "translations";
     readonly isCorrect: "isCorrect";
     readonly orderIndex: "orderIndex";
     readonly createdAt: "createdAt";
@@ -1552,6 +1559,8 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>;
 export type EnumContentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContentStatus'>;
 export type ListEnumContentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContentStatus[]'>;
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>;
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>;
 export type EnumQuestionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestionType'>;
 export type ListEnumQuestionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestionType[]'>;
 export type EnumQuestionSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestionSource'>;
@@ -1560,8 +1569,6 @@ export type EnumQuestionFormatFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 export type ListEnumQuestionFormatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestionFormat[]'>;
 export type EnumDifficultyLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DifficultyLevel'>;
 export type ListEnumDifficultyLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DifficultyLevel[]'>;
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>;
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>;
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>;
 export type EnumQuestionDeliveryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestionDeliveryStatus'>;
 export type ListEnumQuestionDeliveryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestionDeliveryStatus[]'>;

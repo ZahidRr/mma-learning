@@ -47,6 +47,7 @@ export type TopicCountAggregateOutputType = {
     name: number;
     slug: number;
     description: number;
+    translations: number;
     gradeLevel: number;
     orderIndex: number;
     status: number;
@@ -92,6 +93,7 @@ export type TopicCountAggregateInputType = {
     name?: true;
     slug?: true;
     description?: true;
+    translations?: true;
     gradeLevel?: true;
     orderIndex?: true;
     status?: true;
@@ -133,6 +135,7 @@ export type TopicGroupByOutputType = {
     name: string;
     slug: string;
     description: string | null;
+    translations: runtime.JsonValue | null;
     gradeLevel: number;
     orderIndex: number;
     status: $Enums.ContentStatus;
@@ -156,6 +159,7 @@ export type TopicWhereInput = {
     name?: Prisma.StringFilter<"Topic"> | string;
     slug?: Prisma.StringFilter<"Topic"> | string;
     description?: Prisma.StringNullableFilter<"Topic"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Topic">;
     gradeLevel?: Prisma.IntFilter<"Topic"> | number;
     orderIndex?: Prisma.IntFilter<"Topic"> | number;
     status?: Prisma.EnumContentStatusFilter<"Topic"> | $Enums.ContentStatus;
@@ -170,6 +174,7 @@ export type TopicOrderByWithRelationInput = {
     name?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrderInput | Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     gradeLevel?: Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -188,6 +193,7 @@ export type TopicWhereUniqueInput = Prisma.AtLeast<{
     name?: Prisma.StringFilter<"Topic"> | string;
     slug?: Prisma.StringFilter<"Topic"> | string;
     description?: Prisma.StringNullableFilter<"Topic"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Topic">;
     gradeLevel?: Prisma.IntFilter<"Topic"> | number;
     orderIndex?: Prisma.IntFilter<"Topic"> | number;
     status?: Prisma.EnumContentStatusFilter<"Topic"> | $Enums.ContentStatus;
@@ -202,6 +208,7 @@ export type TopicOrderByWithAggregationInput = {
     name?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrderInput | Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     gradeLevel?: Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -222,6 +229,7 @@ export type TopicScalarWhereWithAggregatesInput = {
     name?: Prisma.StringWithAggregatesFilter<"Topic"> | string;
     slug?: Prisma.StringWithAggregatesFilter<"Topic"> | string;
     description?: Prisma.StringNullableWithAggregatesFilter<"Topic"> | string | null;
+    translations?: Prisma.JsonNullableWithAggregatesFilter<"Topic">;
     gradeLevel?: Prisma.IntWithAggregatesFilter<"Topic"> | number;
     orderIndex?: Prisma.IntWithAggregatesFilter<"Topic"> | number;
     status?: Prisma.EnumContentStatusWithAggregatesFilter<"Topic"> | $Enums.ContentStatus;
@@ -233,6 +241,7 @@ export type TopicCreateInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel: number;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -247,6 +256,7 @@ export type TopicUncheckedCreateInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel: number;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -259,6 +269,7 @@ export type TopicUpdateInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -273,6 +284,7 @@ export type TopicUncheckedUpdateInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -286,6 +298,7 @@ export type TopicCreateManyInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel: number;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -297,6 +310,7 @@ export type TopicUpdateManyMutationInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -309,6 +323,7 @@ export type TopicUncheckedUpdateManyInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -334,6 +349,7 @@ export type TopicCountOrderByAggregateInput = {
     name?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrder;
+    translations?: Prisma.SortOrder;
     gradeLevel?: Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -431,6 +447,7 @@ export type TopicCreateWithoutSubjectInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel: number;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -443,6 +460,7 @@ export type TopicUncheckedCreateWithoutSubjectInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel: number;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -480,6 +498,7 @@ export type TopicScalarWhereInput = {
     name?: Prisma.StringFilter<"Topic"> | string;
     slug?: Prisma.StringFilter<"Topic"> | string;
     description?: Prisma.StringNullableFilter<"Topic"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Topic">;
     gradeLevel?: Prisma.IntFilter<"Topic"> | number;
     orderIndex?: Prisma.IntFilter<"Topic"> | number;
     status?: Prisma.EnumContentStatusFilter<"Topic"> | $Enums.ContentStatus;
@@ -491,6 +510,7 @@ export type TopicCreateWithoutSkillsInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel: number;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -504,6 +524,7 @@ export type TopicUncheckedCreateWithoutSkillsInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel: number;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -528,6 +549,7 @@ export type TopicUpdateWithoutSkillsInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -541,6 +563,7 @@ export type TopicUncheckedUpdateWithoutSkillsInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -552,6 +575,7 @@ export type TopicCreateManySubjectInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel: number;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -563,6 +587,7 @@ export type TopicUpdateWithoutSubjectInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -575,6 +600,7 @@ export type TopicUncheckedUpdateWithoutSubjectInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -587,6 +613,7 @@ export type TopicUncheckedUpdateManyWithoutSubjectInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     gradeLevel?: Prisma.IntFieldUpdateOperationsInput | number;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -611,6 +638,7 @@ export type TopicSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     gradeLevel?: boolean;
     orderIndex?: boolean;
     status?: boolean;
@@ -626,6 +654,7 @@ export type TopicSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     gradeLevel?: boolean;
     orderIndex?: boolean;
     status?: boolean;
@@ -639,6 +668,7 @@ export type TopicSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     gradeLevel?: boolean;
     orderIndex?: boolean;
     status?: boolean;
@@ -652,13 +682,14 @@ export type TopicSelectScalar = {
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     gradeLevel?: boolean;
     orderIndex?: boolean;
     status?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type TopicOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "subjectId" | "name" | "slug" | "description" | "gradeLevel" | "orderIndex" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["topic"]>;
+export type TopicOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "subjectId" | "name" | "slug" | "description" | "translations" | "gradeLevel" | "orderIndex" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["topic"]>;
 export type TopicInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     subject?: boolean | Prisma.SubjectDefaultArgs<ExtArgs>;
     skills?: boolean | Prisma.Topic$skillsArgs<ExtArgs>;
@@ -682,6 +713,7 @@ export type $TopicPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
         name: string;
         slug: string;
         description: string | null;
+        translations: runtime.JsonValue | null;
         gradeLevel: number;
         orderIndex: number;
         status: $Enums.ContentStatus;
@@ -751,6 +783,7 @@ export interface TopicFieldRefs {
     readonly name: Prisma.FieldRef<"Topic", 'String'>;
     readonly slug: Prisma.FieldRef<"Topic", 'String'>;
     readonly description: Prisma.FieldRef<"Topic", 'String'>;
+    readonly translations: Prisma.FieldRef<"Topic", 'Json'>;
     readonly gradeLevel: Prisma.FieldRef<"Topic", 'Int'>;
     readonly orderIndex: Prisma.FieldRef<"Topic", 'Int'>;
     readonly status: Prisma.FieldRef<"Topic", 'ContentStatus'>;

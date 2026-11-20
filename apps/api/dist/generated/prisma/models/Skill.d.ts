@@ -43,6 +43,7 @@ export type SkillCountAggregateOutputType = {
     name: number;
     slug: number;
     description: number;
+    translations: number;
     orderIndex: number;
     status: number;
     createdAt: number;
@@ -83,6 +84,7 @@ export type SkillCountAggregateInputType = {
     name?: true;
     slug?: true;
     description?: true;
+    translations?: true;
     orderIndex?: true;
     status?: true;
     createdAt?: true;
@@ -123,6 +125,7 @@ export type SkillGroupByOutputType = {
     name: string;
     slug: string;
     description: string | null;
+    translations: runtime.JsonValue | null;
     orderIndex: number;
     status: $Enums.ContentStatus;
     createdAt: Date;
@@ -145,6 +148,7 @@ export type SkillWhereInput = {
     name?: Prisma.StringFilter<"Skill"> | string;
     slug?: Prisma.StringFilter<"Skill"> | string;
     description?: Prisma.StringNullableFilter<"Skill"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Skill">;
     orderIndex?: Prisma.IntFilter<"Skill"> | number;
     status?: Prisma.EnumContentStatusFilter<"Skill"> | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFilter<"Skill"> | Date | string;
@@ -160,6 +164,7 @@ export type SkillOrderByWithRelationInput = {
     name?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrderInput | Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
@@ -179,6 +184,7 @@ export type SkillWhereUniqueInput = Prisma.AtLeast<{
     name?: Prisma.StringFilter<"Skill"> | string;
     slug?: Prisma.StringFilter<"Skill"> | string;
     description?: Prisma.StringNullableFilter<"Skill"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Skill">;
     orderIndex?: Prisma.IntFilter<"Skill"> | number;
     status?: Prisma.EnumContentStatusFilter<"Skill"> | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFilter<"Skill"> | Date | string;
@@ -194,6 +200,7 @@ export type SkillOrderByWithAggregationInput = {
     name?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrderInput | Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
@@ -213,6 +220,7 @@ export type SkillScalarWhereWithAggregatesInput = {
     name?: Prisma.StringWithAggregatesFilter<"Skill"> | string;
     slug?: Prisma.StringWithAggregatesFilter<"Skill"> | string;
     description?: Prisma.StringNullableWithAggregatesFilter<"Skill"> | string | null;
+    translations?: Prisma.JsonNullableWithAggregatesFilter<"Skill">;
     orderIndex?: Prisma.IntWithAggregatesFilter<"Skill"> | number;
     status?: Prisma.EnumContentStatusWithAggregatesFilter<"Skill"> | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeWithAggregatesFilter<"Skill"> | Date | string;
@@ -223,6 +231,7 @@ export type SkillCreateInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -238,6 +247,7 @@ export type SkillUncheckedCreateInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -251,6 +261,7 @@ export type SkillUpdateInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -266,6 +277,7 @@ export type SkillUncheckedUpdateInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -280,6 +292,7 @@ export type SkillCreateManyInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -290,6 +303,7 @@ export type SkillUpdateManyMutationInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -301,6 +315,7 @@ export type SkillUncheckedUpdateManyInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -324,6 +339,7 @@ export type SkillCountOrderByAggregateInput = {
     name?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrder;
+    translations?: Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
@@ -440,6 +456,7 @@ export type SkillCreateWithoutTopicInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -453,6 +470,7 @@ export type SkillUncheckedCreateWithoutTopicInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -491,6 +509,7 @@ export type SkillScalarWhereInput = {
     name?: Prisma.StringFilter<"Skill"> | string;
     slug?: Prisma.StringFilter<"Skill"> | string;
     description?: Prisma.StringNullableFilter<"Skill"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Skill">;
     orderIndex?: Prisma.IntFilter<"Skill"> | number;
     status?: Prisma.EnumContentStatusFilter<"Skill"> | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFilter<"Skill"> | Date | string;
@@ -501,6 +520,7 @@ export type SkillCreateWithoutLessonsInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -515,6 +535,7 @@ export type SkillUncheckedCreateWithoutLessonsInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -540,6 +561,7 @@ export type SkillUpdateWithoutLessonsInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -554,6 +576,7 @@ export type SkillUncheckedUpdateWithoutLessonsInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -566,6 +589,7 @@ export type SkillCreateWithoutQuestionsInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -580,6 +604,7 @@ export type SkillUncheckedCreateWithoutQuestionsInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -605,6 +630,7 @@ export type SkillUpdateWithoutQuestionsInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -619,6 +645,7 @@ export type SkillUncheckedUpdateWithoutQuestionsInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -631,6 +658,7 @@ export type SkillCreateWithoutMasteriesInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -645,6 +673,7 @@ export type SkillUncheckedCreateWithoutMasteriesInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -670,6 +699,7 @@ export type SkillUpdateWithoutMasteriesInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -684,6 +714,7 @@ export type SkillUncheckedUpdateWithoutMasteriesInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -696,6 +727,7 @@ export type SkillCreateManyTopicInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
     createdAt?: Date | string;
@@ -706,6 +738,7 @@ export type SkillUpdateWithoutTopicInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -719,6 +752,7 @@ export type SkillUncheckedUpdateWithoutTopicInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -732,6 +766,7 @@ export type SkillUncheckedUpdateManyWithoutTopicInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -765,6 +800,7 @@ export type SkillSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     orderIndex?: boolean;
     status?: boolean;
     createdAt?: boolean;
@@ -781,6 +817,7 @@ export type SkillSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     orderIndex?: boolean;
     status?: boolean;
     createdAt?: boolean;
@@ -793,6 +830,7 @@ export type SkillSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     orderIndex?: boolean;
     status?: boolean;
     createdAt?: boolean;
@@ -805,12 +843,13 @@ export type SkillSelectScalar = {
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     orderIndex?: boolean;
     status?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type SkillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "topicId" | "name" | "slug" | "description" | "orderIndex" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["skill"]>;
+export type SkillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "topicId" | "name" | "slug" | "description" | "translations" | "orderIndex" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["skill"]>;
 export type SkillInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     topic?: boolean | Prisma.TopicDefaultArgs<ExtArgs>;
     lessons?: boolean | Prisma.Skill$lessonsArgs<ExtArgs>;
@@ -838,6 +877,7 @@ export type $SkillPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
         name: string;
         slug: string;
         description: string | null;
+        translations: runtime.JsonValue | null;
         orderIndex: number;
         status: $Enums.ContentStatus;
         createdAt: Date;
@@ -908,6 +948,7 @@ export interface SkillFieldRefs {
     readonly name: Prisma.FieldRef<"Skill", 'String'>;
     readonly slug: Prisma.FieldRef<"Skill", 'String'>;
     readonly description: Prisma.FieldRef<"Skill", 'String'>;
+    readonly translations: Prisma.FieldRef<"Skill", 'Json'>;
     readonly orderIndex: Prisma.FieldRef<"Skill", 'Int'>;
     readonly status: Prisma.FieldRef<"Skill", 'ContentStatus'>;
     readonly createdAt: Prisma.FieldRef<"Skill", 'DateTime'>;

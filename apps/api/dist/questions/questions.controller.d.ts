@@ -2,7 +2,7 @@ import { QuestionsService } from './questions.service.js';
 export declare class QuestionsController {
     private readonly questionsService;
     constructor(questionsService: QuestionsService);
-    getLessonQuestions(lessonId: string, userId: string): Promise<{
+    getLessonQuestions(lessonId: string, userId: string, lang?: string): Promise<{
         lesson: {
             id: string;
             title: string;
@@ -10,6 +10,7 @@ export declare class QuestionsController {
             xpReward: number;
             skillId: string;
         };
+        locale: "id" | "en" | "zh";
         adaptive: {
             skillId: string;
             overallMastery: number;
@@ -42,17 +43,18 @@ export declare class QuestionsController {
             source: any;
             format: any;
             difficulty: any;
-            prompt: any;
+            prompt: string;
             options: any;
         })[];
     }>;
-    getNextQuestion(lessonId: string, sessionId: string): Promise<{
+    getNextQuestion(lessonId: string, sessionId: string, lang?: string): Promise<{
         lesson: {
             id: string;
             title: string;
             skillId: string;
             xpReward: number;
         };
+        locale: "id" | "en" | "zh";
         session: {
             id: string;
             targetQuestions: number;
@@ -95,7 +97,7 @@ export declare class QuestionsController {
             source: any;
             format: any;
             difficulty: any;
-            prompt: any;
+            prompt: string;
             options: any;
             correctOptionId?: undefined;
         };
@@ -106,6 +108,7 @@ export declare class QuestionsController {
             skillId: string;
             xpReward: number;
         };
+        locale: "id" | "en" | "zh";
         session: {
             id: string;
             targetQuestions: number;
@@ -148,7 +151,7 @@ export declare class QuestionsController {
             source: any;
             format: any;
             difficulty: any;
-            prompt: any;
+            prompt: string;
             options: any;
         };
     }>;

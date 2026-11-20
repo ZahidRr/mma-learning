@@ -1,10 +1,11 @@
 import { AdaptiveDifficulty, AdaptiveService } from '../adaptive/adaptive.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+type SupportedLocale = 'en' | 'id' | 'zh';
 export declare class QuestionsService {
     private readonly prisma;
     private readonly adaptiveService;
     constructor(prisma: PrismaService, adaptiveService: AdaptiveService);
-    getLessonQuestions(lessonId: string, userId: string): Promise<{
+    getLessonQuestions(lessonId: string, userId: string, lang?: string): Promise<{
         lesson: {
             id: string;
             title: string;
@@ -12,6 +13,7 @@ export declare class QuestionsService {
             xpReward: number;
             skillId: string;
         };
+        locale: SupportedLocale;
         adaptive: {
             skillId: string;
             overallMastery: number;
@@ -44,17 +46,18 @@ export declare class QuestionsService {
             source: any;
             format: any;
             difficulty: any;
-            prompt: any;
+            prompt: string;
             options: any;
         })[];
     }>;
-    getNextQuestion(lessonId: string, sessionId: string): Promise<{
+    getNextQuestion(lessonId: string, sessionId: string, lang?: string): Promise<{
         lesson: {
             id: string;
             title: string;
             skillId: string;
             xpReward: number;
         };
+        locale: SupportedLocale;
         session: {
             id: string;
             targetQuestions: number;
@@ -97,7 +100,7 @@ export declare class QuestionsService {
             source: any;
             format: any;
             difficulty: any;
-            prompt: any;
+            prompt: string;
             options: any;
             correctOptionId?: undefined;
         };
@@ -108,6 +111,7 @@ export declare class QuestionsService {
             skillId: string;
             xpReward: number;
         };
+        locale: SupportedLocale;
         session: {
             id: string;
             targetQuestions: number;
@@ -150,7 +154,7 @@ export declare class QuestionsService {
             source: any;
             format: any;
             difficulty: any;
-            prompt: any;
+            prompt: string;
             options: any;
         };
     }>;
@@ -164,3 +168,4 @@ export declare class QuestionsService {
     private buildQuestionFromDelivery;
     private buildParameterizedQuestion;
 }
+export {};

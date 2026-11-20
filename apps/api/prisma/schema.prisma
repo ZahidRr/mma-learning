@@ -75,11 +75,12 @@ model User {
 }
 
 model LearnerProfile {
-  id          String  @id @default(cuid())
-  userId      String  @unique
-  displayName String
-  gradeLevel  Int
-  avatarKey   String?
+  id                String  @id @default(cuid())
+  userId            String  @unique
+  displayName       String
+  gradeLevel        Int
+  avatarKey         String?
+  preferredLanguage String  @default("en")
 
   totalXp Int @default(0)
 
@@ -107,10 +108,11 @@ model Subject {
   id           String @id @default(cuid())
   curriculumId String
 
-  name        String
-  slug        String
-  description String?
-  iconKey     String?
+  name         String
+  slug         String
+  description  String?
+  translations Json?
+  iconKey      String?
 
   orderIndex Int           @default(0)
   status     ContentStatus @default(DRAFT)
@@ -130,9 +132,10 @@ model Topic {
   id        String @id @default(cuid())
   subjectId String
 
-  name        String
-  slug        String
-  description String?
+  name         String
+  slug         String
+  description  String?
+  translations Json?
 
   gradeLevel Int
   orderIndex Int @default(0)
@@ -155,9 +158,10 @@ model Skill {
   id      String @id @default(cuid())
   topicId String
 
-  name        String
-  slug        String
-  description String?
+  name         String
+  slug         String
+  description  String?
+  translations Json?
 
   orderIndex Int           @default(0)
   status     ContentStatus @default(DRAFT)
@@ -179,9 +183,10 @@ model Lesson {
   id      String @id @default(cuid())
   skillId String
 
-  title       String
-  slug        String
-  description String?
+  title        String
+  slug         String
+  description  String?
+  translations Json?
 
   orderIndex Int @default(0)
   xpReward   Int @default(50)
@@ -212,8 +217,9 @@ model Question {
   format     QuestionFormat  @default(STANDARD)
   difficulty DifficultyLevel
 
-  prompt      String
-  explanation String?
+  prompt       String
+  explanation  String?
+  translations Json?
 
   answerConfig Json?
 
@@ -242,9 +248,10 @@ model QuestionOption {
   id         String @id @default(cuid())
   questionId String
 
-  text       String
-  isCorrect  Boolean @default(false)
-  orderIndex Int     @default(0)
+  text         String
+  translations Json?
+  isCorrect    Boolean @default(false)
+  orderIndex   Int     @default(0)
 
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
@@ -363,7 +370,7 @@ model LessonSession {
   userId   String
   lessonId String
 
-  targetQuestions   Int @default(10)
+  targetQuestions   Int @default(12)
   answeredQuestions Int @default(0)
   correctAnswers    Int @default(0)
 

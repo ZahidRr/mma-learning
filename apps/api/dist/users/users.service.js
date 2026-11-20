@@ -7,7 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import * as argon2 from 'argon2';
 let UsersService = class UsersService {
@@ -48,6 +48,31 @@ let UsersService = class UsersService {
                 learnerProfile: {
                     update: {
                         displayName: payload.nickname || user.learnerProfile?.displayName || '',
+                    },
+                },
+            },
+            include: {
+                learnerProfile: true,
+            },
+        });
+    }
+    async updatePreferredLanguage(userId, language) {
+        if (!['en', 'id', 'zh'].includes(language)) {
+            throw new BadRequestException('Unsupported language. Use en, id, or zh.');
+        }
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            include: { learnerProfile: true },
+        });
+        if (!user || !user.learnerProfile) {
+            throw new NotFoundException('User or learner profile not found');
+        }
+        return this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                learnerProfile: {
+                    update: {
+                        preferredLanguage: language,
                     },
                 },
             },

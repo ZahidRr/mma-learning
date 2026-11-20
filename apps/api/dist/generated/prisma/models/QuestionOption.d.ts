@@ -36,6 +36,7 @@ export type QuestionOptionCountAggregateOutputType = {
     id: number;
     questionId: number;
     text: number;
+    translations: number;
     isCorrect: number;
     orderIndex: number;
     createdAt: number;
@@ -70,6 +71,7 @@ export type QuestionOptionCountAggregateInputType = {
     id?: true;
     questionId?: true;
     text?: true;
+    translations?: true;
     isCorrect?: true;
     orderIndex?: true;
     createdAt?: true;
@@ -108,6 +110,7 @@ export type QuestionOptionGroupByOutputType = {
     id: string;
     questionId: string;
     text: string;
+    translations: runtime.JsonValue | null;
     isCorrect: boolean;
     orderIndex: number;
     createdAt: Date;
@@ -128,6 +131,7 @@ export type QuestionOptionWhereInput = {
     id?: Prisma.StringFilter<"QuestionOption"> | string;
     questionId?: Prisma.StringFilter<"QuestionOption"> | string;
     text?: Prisma.StringFilter<"QuestionOption"> | string;
+    translations?: Prisma.JsonNullableFilter<"QuestionOption">;
     isCorrect?: Prisma.BoolFilter<"QuestionOption"> | boolean;
     orderIndex?: Prisma.IntFilter<"QuestionOption"> | number;
     createdAt?: Prisma.DateTimeFilter<"QuestionOption"> | Date | string;
@@ -138,6 +142,7 @@ export type QuestionOptionOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
     questionId?: Prisma.SortOrder;
     text?: Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     isCorrect?: Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
@@ -151,6 +156,7 @@ export type QuestionOptionWhereUniqueInput = Prisma.AtLeast<{
     NOT?: Prisma.QuestionOptionWhereInput | Prisma.QuestionOptionWhereInput[];
     questionId?: Prisma.StringFilter<"QuestionOption"> | string;
     text?: Prisma.StringFilter<"QuestionOption"> | string;
+    translations?: Prisma.JsonNullableFilter<"QuestionOption">;
     isCorrect?: Prisma.BoolFilter<"QuestionOption"> | boolean;
     orderIndex?: Prisma.IntFilter<"QuestionOption"> | number;
     createdAt?: Prisma.DateTimeFilter<"QuestionOption"> | Date | string;
@@ -161,6 +167,7 @@ export type QuestionOptionOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
     questionId?: Prisma.SortOrder;
     text?: Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     isCorrect?: Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
@@ -178,6 +185,7 @@ export type QuestionOptionScalarWhereWithAggregatesInput = {
     id?: Prisma.StringWithAggregatesFilter<"QuestionOption"> | string;
     questionId?: Prisma.StringWithAggregatesFilter<"QuestionOption"> | string;
     text?: Prisma.StringWithAggregatesFilter<"QuestionOption"> | string;
+    translations?: Prisma.JsonNullableWithAggregatesFilter<"QuestionOption">;
     isCorrect?: Prisma.BoolWithAggregatesFilter<"QuestionOption"> | boolean;
     orderIndex?: Prisma.IntWithAggregatesFilter<"QuestionOption"> | number;
     createdAt?: Prisma.DateTimeWithAggregatesFilter<"QuestionOption"> | Date | string;
@@ -186,6 +194,7 @@ export type QuestionOptionScalarWhereWithAggregatesInput = {
 export type QuestionOptionCreateInput = {
     id?: string;
     text: string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: boolean;
     orderIndex?: number;
     createdAt?: Date | string;
@@ -196,6 +205,7 @@ export type QuestionOptionUncheckedCreateInput = {
     id?: string;
     questionId: string;
     text: string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: boolean;
     orderIndex?: number;
     createdAt?: Date | string;
@@ -204,6 +214,7 @@ export type QuestionOptionUncheckedCreateInput = {
 export type QuestionOptionUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     text?: Prisma.StringFieldUpdateOperationsInput | string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -214,6 +225,7 @@ export type QuestionOptionUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     questionId?: Prisma.StringFieldUpdateOperationsInput | string;
     text?: Prisma.StringFieldUpdateOperationsInput | string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -223,6 +235,7 @@ export type QuestionOptionCreateManyInput = {
     id?: string;
     questionId: string;
     text: string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: boolean;
     orderIndex?: number;
     createdAt?: Date | string;
@@ -231,6 +244,7 @@ export type QuestionOptionCreateManyInput = {
 export type QuestionOptionUpdateManyMutationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     text?: Prisma.StringFieldUpdateOperationsInput | string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -240,6 +254,7 @@ export type QuestionOptionUncheckedUpdateManyInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     questionId?: Prisma.StringFieldUpdateOperationsInput | string;
     text?: Prisma.StringFieldUpdateOperationsInput | string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -257,6 +272,7 @@ export type QuestionOptionCountOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     questionId?: Prisma.SortOrder;
     text?: Prisma.SortOrder;
+    translations?: Prisma.SortOrder;
     isCorrect?: Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
@@ -330,6 +346,7 @@ export type BoolFieldUpdateOperationsInput = {
 export type QuestionOptionCreateWithoutQuestionInput = {
     id?: string;
     text: string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: boolean;
     orderIndex?: number;
     createdAt?: Date | string;
@@ -338,6 +355,7 @@ export type QuestionOptionCreateWithoutQuestionInput = {
 export type QuestionOptionUncheckedCreateWithoutQuestionInput = {
     id?: string;
     text: string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: boolean;
     orderIndex?: number;
     createdAt?: Date | string;
@@ -371,6 +389,7 @@ export type QuestionOptionScalarWhereInput = {
     id?: Prisma.StringFilter<"QuestionOption"> | string;
     questionId?: Prisma.StringFilter<"QuestionOption"> | string;
     text?: Prisma.StringFilter<"QuestionOption"> | string;
+    translations?: Prisma.JsonNullableFilter<"QuestionOption">;
     isCorrect?: Prisma.BoolFilter<"QuestionOption"> | boolean;
     orderIndex?: Prisma.IntFilter<"QuestionOption"> | number;
     createdAt?: Prisma.DateTimeFilter<"QuestionOption"> | Date | string;
@@ -379,6 +398,7 @@ export type QuestionOptionScalarWhereInput = {
 export type QuestionOptionCreateManyQuestionInput = {
     id?: string;
     text: string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: boolean;
     orderIndex?: number;
     createdAt?: Date | string;
@@ -387,6 +407,7 @@ export type QuestionOptionCreateManyQuestionInput = {
 export type QuestionOptionUpdateWithoutQuestionInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     text?: Prisma.StringFieldUpdateOperationsInput | string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -395,6 +416,7 @@ export type QuestionOptionUpdateWithoutQuestionInput = {
 export type QuestionOptionUncheckedUpdateWithoutQuestionInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     text?: Prisma.StringFieldUpdateOperationsInput | string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -403,6 +425,7 @@ export type QuestionOptionUncheckedUpdateWithoutQuestionInput = {
 export type QuestionOptionUncheckedUpdateManyWithoutQuestionInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     text?: Prisma.StringFieldUpdateOperationsInput | string;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -412,6 +435,7 @@ export type QuestionOptionSelect<ExtArgs extends runtime.Types.Extensions.Intern
     id?: boolean;
     questionId?: boolean;
     text?: boolean;
+    translations?: boolean;
     isCorrect?: boolean;
     orderIndex?: boolean;
     createdAt?: boolean;
@@ -422,6 +446,7 @@ export type QuestionOptionSelectCreateManyAndReturn<ExtArgs extends runtime.Type
     id?: boolean;
     questionId?: boolean;
     text?: boolean;
+    translations?: boolean;
     isCorrect?: boolean;
     orderIndex?: boolean;
     createdAt?: boolean;
@@ -432,6 +457,7 @@ export type QuestionOptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
     id?: boolean;
     questionId?: boolean;
     text?: boolean;
+    translations?: boolean;
     isCorrect?: boolean;
     orderIndex?: boolean;
     createdAt?: boolean;
@@ -442,12 +468,13 @@ export type QuestionOptionSelectScalar = {
     id?: boolean;
     questionId?: boolean;
     text?: boolean;
+    translations?: boolean;
     isCorrect?: boolean;
     orderIndex?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type QuestionOptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "questionId" | "text" | "isCorrect" | "orderIndex" | "createdAt" | "updatedAt", ExtArgs["result"]["questionOption"]>;
+export type QuestionOptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "questionId" | "text" | "translations" | "isCorrect" | "orderIndex" | "createdAt" | "updatedAt", ExtArgs["result"]["questionOption"]>;
 export type QuestionOptionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
 };
@@ -466,6 +493,7 @@ export type $QuestionOptionPayload<ExtArgs extends runtime.Types.Extensions.Inte
         id: string;
         questionId: string;
         text: string;
+        translations: runtime.JsonValue | null;
         isCorrect: boolean;
         orderIndex: number;
         createdAt: Date;
@@ -531,6 +559,7 @@ export interface QuestionOptionFieldRefs {
     readonly id: Prisma.FieldRef<"QuestionOption", 'String'>;
     readonly questionId: Prisma.FieldRef<"QuestionOption", 'String'>;
     readonly text: Prisma.FieldRef<"QuestionOption", 'String'>;
+    readonly translations: Prisma.FieldRef<"QuestionOption", 'Json'>;
     readonly isCorrect: Prisma.FieldRef<"QuestionOption", 'Boolean'>;
     readonly orderIndex: Prisma.FieldRef<"QuestionOption", 'Int'>;
     readonly createdAt: Prisma.FieldRef<"QuestionOption", 'DateTime'>;

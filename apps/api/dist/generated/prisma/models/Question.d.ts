@@ -58,6 +58,7 @@ export type QuestionCountAggregateOutputType = {
     difficulty: number;
     prompt: number;
     explanation: number;
+    translations: number;
     answerConfig: number;
     orderIndex: number;
     status: number;
@@ -114,6 +115,7 @@ export type QuestionCountAggregateInputType = {
     difficulty?: true;
     prompt?: true;
     explanation?: true;
+    translations?: true;
     answerConfig?: true;
     orderIndex?: true;
     status?: true;
@@ -160,6 +162,7 @@ export type QuestionGroupByOutputType = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation: string | null;
+    translations: runtime.JsonValue | null;
     answerConfig: runtime.JsonValue | null;
     orderIndex: number;
     status: $Enums.ContentStatus;
@@ -188,6 +191,7 @@ export type QuestionWhereInput = {
     difficulty?: Prisma.EnumDifficultyLevelFilter<"Question"> | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFilter<"Question"> | string;
     explanation?: Prisma.StringNullableFilter<"Question"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Question">;
     answerConfig?: Prisma.JsonNullableFilter<"Question">;
     orderIndex?: Prisma.IntFilter<"Question"> | number;
     status?: Prisma.EnumContentStatusFilter<"Question"> | $Enums.ContentStatus;
@@ -212,6 +216,7 @@ export type QuestionOrderByWithRelationInput = {
     difficulty?: Prisma.SortOrder;
     prompt?: Prisma.SortOrder;
     explanation?: Prisma.SortOrderInput | Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     answerConfig?: Prisma.SortOrderInput | Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -239,6 +244,7 @@ export type QuestionWhereUniqueInput = Prisma.AtLeast<{
     difficulty?: Prisma.EnumDifficultyLevelFilter<"Question"> | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFilter<"Question"> | string;
     explanation?: Prisma.StringNullableFilter<"Question"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Question">;
     answerConfig?: Prisma.JsonNullableFilter<"Question">;
     orderIndex?: Prisma.IntFilter<"Question"> | number;
     status?: Prisma.EnumContentStatusFilter<"Question"> | $Enums.ContentStatus;
@@ -263,6 +269,7 @@ export type QuestionOrderByWithAggregationInput = {
     difficulty?: Prisma.SortOrder;
     prompt?: Prisma.SortOrder;
     explanation?: Prisma.SortOrderInput | Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     answerConfig?: Prisma.SortOrderInput | Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -288,6 +295,7 @@ export type QuestionScalarWhereWithAggregatesInput = {
     difficulty?: Prisma.EnumDifficultyLevelWithAggregatesFilter<"Question"> | $Enums.DifficultyLevel;
     prompt?: Prisma.StringWithAggregatesFilter<"Question"> | string;
     explanation?: Prisma.StringNullableWithAggregatesFilter<"Question"> | string | null;
+    translations?: Prisma.JsonNullableWithAggregatesFilter<"Question">;
     answerConfig?: Prisma.JsonNullableWithAggregatesFilter<"Question">;
     orderIndex?: Prisma.IntWithAggregatesFilter<"Question"> | number;
     status?: Prisma.EnumContentStatusWithAggregatesFilter<"Question"> | $Enums.ContentStatus;
@@ -303,6 +311,7 @@ export type QuestionCreateInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -327,6 +336,7 @@ export type QuestionUncheckedCreateInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -347,6 +357,7 @@ export type QuestionUpdateInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -371,6 +382,7 @@ export type QuestionUncheckedUpdateInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -393,6 +405,7 @@ export type QuestionCreateManyInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -408,6 +421,7 @@ export type QuestionUpdateManyMutationInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -425,6 +439,7 @@ export type QuestionUncheckedUpdateManyInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -450,6 +465,7 @@ export type QuestionCountOrderByAggregateInput = {
     difficulty?: Prisma.SortOrder;
     prompt?: Prisma.SortOrder;
     explanation?: Prisma.SortOrder;
+    translations?: Prisma.SortOrder;
     answerConfig?: Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -655,6 +671,7 @@ export type QuestionCreateWithoutSkillInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -677,6 +694,7 @@ export type QuestionUncheckedCreateWithoutSkillInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -723,6 +741,7 @@ export type QuestionScalarWhereInput = {
     difficulty?: Prisma.EnumDifficultyLevelFilter<"Question"> | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFilter<"Question"> | string;
     explanation?: Prisma.StringNullableFilter<"Question"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Question">;
     answerConfig?: Prisma.JsonNullableFilter<"Question">;
     orderIndex?: Prisma.IntFilter<"Question"> | number;
     status?: Prisma.EnumContentStatusFilter<"Question"> | $Enums.ContentStatus;
@@ -738,6 +757,7 @@ export type QuestionCreateWithoutLessonInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -760,6 +780,7 @@ export type QuestionUncheckedCreateWithoutLessonInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -801,6 +822,7 @@ export type QuestionCreateWithoutOptionsInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -824,6 +846,7 @@ export type QuestionUncheckedCreateWithoutOptionsInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -856,6 +879,7 @@ export type QuestionUpdateWithoutOptionsInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -879,6 +903,7 @@ export type QuestionUncheckedUpdateWithoutOptionsInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -898,6 +923,7 @@ export type QuestionCreateWithoutTemplateInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -921,6 +947,7 @@ export type QuestionUncheckedCreateWithoutTemplateInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -953,6 +980,7 @@ export type QuestionUpdateWithoutTemplateInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -976,6 +1004,7 @@ export type QuestionUncheckedUpdateWithoutTemplateInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -995,6 +1024,7 @@ export type QuestionCreateWithoutGeneratedQuestionsInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -1018,6 +1048,7 @@ export type QuestionUncheckedCreateWithoutGeneratedQuestionsInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -1050,6 +1081,7 @@ export type QuestionUpdateWithoutGeneratedQuestionsInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1073,6 +1105,7 @@ export type QuestionUncheckedUpdateWithoutGeneratedQuestionsInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1092,6 +1125,7 @@ export type QuestionCreateWithoutDeliveriesInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -1115,6 +1149,7 @@ export type QuestionUncheckedCreateWithoutDeliveriesInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -1147,6 +1182,7 @@ export type QuestionUpdateWithoutDeliveriesInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1170,6 +1206,7 @@ export type QuestionUncheckedUpdateWithoutDeliveriesInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1189,6 +1226,7 @@ export type QuestionCreateWithoutAttemptsInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -1212,6 +1250,7 @@ export type QuestionUncheckedCreateWithoutAttemptsInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -1244,6 +1283,7 @@ export type QuestionUpdateWithoutAttemptsInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1267,6 +1307,7 @@ export type QuestionUncheckedUpdateWithoutAttemptsInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1287,6 +1328,7 @@ export type QuestionCreateManySkillInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -1302,6 +1344,7 @@ export type QuestionUpdateWithoutSkillInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1324,6 +1367,7 @@ export type QuestionUncheckedUpdateWithoutSkillInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1345,6 +1389,7 @@ export type QuestionUncheckedUpdateManyWithoutSkillInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1361,6 +1406,7 @@ export type QuestionCreateManyLessonInput = {
     difficulty: $Enums.DifficultyLevel;
     prompt: string;
     explanation?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -1376,6 +1422,7 @@ export type QuestionUpdateWithoutLessonInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1398,6 +1445,7 @@ export type QuestionUncheckedUpdateWithoutLessonInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1419,6 +1467,7 @@ export type QuestionUncheckedUpdateManyWithoutLessonInput = {
     difficulty?: Prisma.EnumDifficultyLevelFieldUpdateOperationsInput | $Enums.DifficultyLevel;
     prompt?: Prisma.StringFieldUpdateOperationsInput | string;
     explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     answerConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -1463,6 +1512,7 @@ export type QuestionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
     difficulty?: boolean;
     prompt?: boolean;
     explanation?: boolean;
+    translations?: boolean;
     answerConfig?: boolean;
     orderIndex?: boolean;
     status?: boolean;
@@ -1488,6 +1538,7 @@ export type QuestionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
     difficulty?: boolean;
     prompt?: boolean;
     explanation?: boolean;
+    translations?: boolean;
     answerConfig?: boolean;
     orderIndex?: boolean;
     status?: boolean;
@@ -1507,6 +1558,7 @@ export type QuestionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
     difficulty?: boolean;
     prompt?: boolean;
     explanation?: boolean;
+    translations?: boolean;
     answerConfig?: boolean;
     orderIndex?: boolean;
     status?: boolean;
@@ -1526,13 +1578,14 @@ export type QuestionSelectScalar = {
     difficulty?: boolean;
     prompt?: boolean;
     explanation?: boolean;
+    translations?: boolean;
     answerConfig?: boolean;
     orderIndex?: boolean;
     status?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type QuestionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "lessonId" | "skillId" | "type" | "source" | "format" | "difficulty" | "prompt" | "explanation" | "answerConfig" | "orderIndex" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["question"]>;
+export type QuestionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "lessonId" | "skillId" | "type" | "source" | "format" | "difficulty" | "prompt" | "explanation" | "translations" | "answerConfig" | "orderIndex" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["question"]>;
 export type QuestionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>;
     skill?: boolean | Prisma.SkillDefaultArgs<ExtArgs>;
@@ -1573,6 +1626,7 @@ export type $QuestionPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
         difficulty: $Enums.DifficultyLevel;
         prompt: string;
         explanation: string | null;
+        translations: runtime.JsonValue | null;
         answerConfig: runtime.JsonValue | null;
         orderIndex: number;
         status: $Enums.ContentStatus;
@@ -1652,6 +1706,7 @@ export interface QuestionFieldRefs {
     readonly difficulty: Prisma.FieldRef<"Question", 'DifficultyLevel'>;
     readonly prompt: Prisma.FieldRef<"Question", 'String'>;
     readonly explanation: Prisma.FieldRef<"Question", 'String'>;
+    readonly translations: Prisma.FieldRef<"Question", 'Json'>;
     readonly answerConfig: Prisma.FieldRef<"Question", 'Json'>;
     readonly orderIndex: Prisma.FieldRef<"Question", 'Int'>;
     readonly status: Prisma.FieldRef<"Question", 'ContentStatus'>;

@@ -51,6 +51,7 @@ export declare const LearnerProfileScalarFieldEnum: {
     readonly displayName: "displayName";
     readonly gradeLevel: "gradeLevel";
     readonly avatarKey: "avatarKey";
+    readonly preferredLanguage: "preferredLanguage";
     readonly totalXp: "totalXp";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
@@ -72,6 +73,7 @@ export declare const SubjectScalarFieldEnum: {
     readonly name: "name";
     readonly slug: "slug";
     readonly description: "description";
+    readonly translations: "translations";
     readonly iconKey: "iconKey";
     readonly orderIndex: "orderIndex";
     readonly status: "status";
@@ -85,6 +87,7 @@ export declare const TopicScalarFieldEnum: {
     readonly name: "name";
     readonly slug: "slug";
     readonly description: "description";
+    readonly translations: "translations";
     readonly gradeLevel: "gradeLevel";
     readonly orderIndex: "orderIndex";
     readonly status: "status";
@@ -98,6 +101,7 @@ export declare const SkillScalarFieldEnum: {
     readonly name: "name";
     readonly slug: "slug";
     readonly description: "description";
+    readonly translations: "translations";
     readonly orderIndex: "orderIndex";
     readonly status: "status";
     readonly createdAt: "createdAt";
@@ -110,6 +114,7 @@ export declare const LessonScalarFieldEnum: {
     readonly title: "title";
     readonly slug: "slug";
     readonly description: "description";
+    readonly translations: "translations";
     readonly orderIndex: "orderIndex";
     readonly xpReward: "xpReward";
     readonly status: "status";
@@ -128,6 +133,7 @@ export declare const QuestionScalarFieldEnum: {
     readonly difficulty: "difficulty";
     readonly prompt: "prompt";
     readonly explanation: "explanation";
+    readonly translations: "translations";
     readonly answerConfig: "answerConfig";
     readonly orderIndex: "orderIndex";
     readonly status: "status";
@@ -139,6 +145,7 @@ export declare const QuestionOptionScalarFieldEnum: {
     readonly id: "id";
     readonly questionId: "questionId";
     readonly text: "text";
+    readonly translations: "translations";
     readonly isCorrect: "isCorrect";
     readonly orderIndex: "orderIndex";
     readonly createdAt: "createdAt";

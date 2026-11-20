@@ -45,6 +45,7 @@ export type SubjectCountAggregateOutputType = {
     name: number;
     slug: number;
     description: number;
+    translations: number;
     iconKey: number;
     orderIndex: number;
     status: number;
@@ -88,6 +89,7 @@ export type SubjectCountAggregateInputType = {
     name?: true;
     slug?: true;
     description?: true;
+    translations?: true;
     iconKey?: true;
     orderIndex?: true;
     status?: true;
@@ -129,6 +131,7 @@ export type SubjectGroupByOutputType = {
     name: string;
     slug: string;
     description: string | null;
+    translations: runtime.JsonValue | null;
     iconKey: string | null;
     orderIndex: number;
     status: $Enums.ContentStatus;
@@ -152,6 +155,7 @@ export type SubjectWhereInput = {
     name?: Prisma.StringFilter<"Subject"> | string;
     slug?: Prisma.StringFilter<"Subject"> | string;
     description?: Prisma.StringNullableFilter<"Subject"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Subject">;
     iconKey?: Prisma.StringNullableFilter<"Subject"> | string | null;
     orderIndex?: Prisma.IntFilter<"Subject"> | number;
     status?: Prisma.EnumContentStatusFilter<"Subject"> | $Enums.ContentStatus;
@@ -166,6 +170,7 @@ export type SubjectOrderByWithRelationInput = {
     name?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrderInput | Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     iconKey?: Prisma.SortOrderInput | Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -184,6 +189,7 @@ export type SubjectWhereUniqueInput = Prisma.AtLeast<{
     name?: Prisma.StringFilter<"Subject"> | string;
     slug?: Prisma.StringFilter<"Subject"> | string;
     description?: Prisma.StringNullableFilter<"Subject"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Subject">;
     iconKey?: Prisma.StringNullableFilter<"Subject"> | string | null;
     orderIndex?: Prisma.IntFilter<"Subject"> | number;
     status?: Prisma.EnumContentStatusFilter<"Subject"> | $Enums.ContentStatus;
@@ -198,6 +204,7 @@ export type SubjectOrderByWithAggregationInput = {
     name?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrderInput | Prisma.SortOrder;
+    translations?: Prisma.SortOrderInput | Prisma.SortOrder;
     iconKey?: Prisma.SortOrderInput | Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -218,6 +225,7 @@ export type SubjectScalarWhereWithAggregatesInput = {
     name?: Prisma.StringWithAggregatesFilter<"Subject"> | string;
     slug?: Prisma.StringWithAggregatesFilter<"Subject"> | string;
     description?: Prisma.StringNullableWithAggregatesFilter<"Subject"> | string | null;
+    translations?: Prisma.JsonNullableWithAggregatesFilter<"Subject">;
     iconKey?: Prisma.StringNullableWithAggregatesFilter<"Subject"> | string | null;
     orderIndex?: Prisma.IntWithAggregatesFilter<"Subject"> | number;
     status?: Prisma.EnumContentStatusWithAggregatesFilter<"Subject"> | $Enums.ContentStatus;
@@ -229,6 +237,7 @@ export type SubjectCreateInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: string | null;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -243,6 +252,7 @@ export type SubjectUncheckedCreateInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: string | null;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -255,6 +265,7 @@ export type SubjectUpdateInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -269,6 +280,7 @@ export type SubjectUncheckedUpdateInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -282,6 +294,7 @@ export type SubjectCreateManyInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: string | null;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -293,6 +306,7 @@ export type SubjectUpdateManyMutationInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -305,6 +319,7 @@ export type SubjectUncheckedUpdateManyInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -329,6 +344,7 @@ export type SubjectCountOrderByAggregateInput = {
     name?: Prisma.SortOrder;
     slug?: Prisma.SortOrder;
     description?: Prisma.SortOrder;
+    translations?: Prisma.SortOrder;
     iconKey?: Prisma.SortOrder;
     orderIndex?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -424,6 +440,7 @@ export type SubjectCreateWithoutCurriculumInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: string | null;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -436,6 +453,7 @@ export type SubjectUncheckedCreateWithoutCurriculumInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: string | null;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -473,6 +491,7 @@ export type SubjectScalarWhereInput = {
     name?: Prisma.StringFilter<"Subject"> | string;
     slug?: Prisma.StringFilter<"Subject"> | string;
     description?: Prisma.StringNullableFilter<"Subject"> | string | null;
+    translations?: Prisma.JsonNullableFilter<"Subject">;
     iconKey?: Prisma.StringNullableFilter<"Subject"> | string | null;
     orderIndex?: Prisma.IntFilter<"Subject"> | number;
     status?: Prisma.EnumContentStatusFilter<"Subject"> | $Enums.ContentStatus;
@@ -484,6 +503,7 @@ export type SubjectCreateWithoutTopicsInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: string | null;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -497,6 +517,7 @@ export type SubjectUncheckedCreateWithoutTopicsInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: string | null;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -521,6 +542,7 @@ export type SubjectUpdateWithoutTopicsInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -534,6 +556,7 @@ export type SubjectUncheckedUpdateWithoutTopicsInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -545,6 +568,7 @@ export type SubjectCreateManyCurriculumInput = {
     name: string;
     slug: string;
     description?: string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: string | null;
     orderIndex?: number;
     status?: $Enums.ContentStatus;
@@ -556,6 +580,7 @@ export type SubjectUpdateWithoutCurriculumInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -568,6 +593,7 @@ export type SubjectUncheckedUpdateWithoutCurriculumInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -580,6 +606,7 @@ export type SubjectUncheckedUpdateManyWithoutCurriculumInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     slug?: Prisma.StringFieldUpdateOperationsInput | string;
     description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     iconKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     orderIndex?: Prisma.IntFieldUpdateOperationsInput | number;
     status?: Prisma.EnumContentStatusFieldUpdateOperationsInput | $Enums.ContentStatus;
@@ -604,6 +631,7 @@ export type SubjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     iconKey?: boolean;
     orderIndex?: boolean;
     status?: boolean;
@@ -619,6 +647,7 @@ export type SubjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     iconKey?: boolean;
     orderIndex?: boolean;
     status?: boolean;
@@ -632,6 +661,7 @@ export type SubjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     iconKey?: boolean;
     orderIndex?: boolean;
     status?: boolean;
@@ -645,13 +675,14 @@ export type SubjectSelectScalar = {
     name?: boolean;
     slug?: boolean;
     description?: boolean;
+    translations?: boolean;
     iconKey?: boolean;
     orderIndex?: boolean;
     status?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type SubjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "curriculumId" | "name" | "slug" | "description" | "iconKey" | "orderIndex" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["subject"]>;
+export type SubjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "curriculumId" | "name" | "slug" | "description" | "translations" | "iconKey" | "orderIndex" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["subject"]>;
 export type SubjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     curriculum?: boolean | Prisma.CurriculumDefaultArgs<ExtArgs>;
     topics?: boolean | Prisma.Subject$topicsArgs<ExtArgs>;
@@ -675,6 +706,7 @@ export type $SubjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
         name: string;
         slug: string;
         description: string | null;
+        translations: runtime.JsonValue | null;
         iconKey: string | null;
         orderIndex: number;
         status: $Enums.ContentStatus;
@@ -744,6 +776,7 @@ export interface SubjectFieldRefs {
     readonly name: Prisma.FieldRef<"Subject", 'String'>;
     readonly slug: Prisma.FieldRef<"Subject", 'String'>;
     readonly description: Prisma.FieldRef<"Subject", 'String'>;
+    readonly translations: Prisma.FieldRef<"Subject", 'Json'>;
     readonly iconKey: Prisma.FieldRef<"Subject", 'String'>;
     readonly orderIndex: Prisma.FieldRef<"Subject", 'Int'>;
     readonly status: Prisma.FieldRef<"Subject", 'ContentStatus'>;

@@ -21,10 +21,12 @@ export class QuestionsController {
   getLessonQuestions(
     @Param('lessonId') lessonId: string,
     @Query('userId') userId: string,
+    @Query('lang') lang?: string,
   ) {
     return this.questionsService.getLessonQuestions(
       lessonId,
       userId,
+      lang,
     );
   }
 
@@ -36,10 +38,12 @@ export class QuestionsController {
   getNextQuestion(
     @Param('lessonId') lessonId: string,
     @Query('sessionId') sessionId: string,
+    @Query('lang') lang?: string,
   ) {
     return this.questionsService.getNextQuestion(
       lessonId,
       sessionId,
+      lang,
     );
   }
 }

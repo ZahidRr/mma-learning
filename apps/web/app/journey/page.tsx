@@ -6,11 +6,8 @@ import Link from 'next/link';
 import useSound from 'use-sound';
 import Header from '../components/Header';
 import { regionLabel, nodeTitle } from '../lib/regions';
+import { UI_TEXT, useAppLocale } from '../lib/i18n';
 
-// =========================================================
-// DEBUG: set ke true untuk kalibrasi koordinat.
-// Klik di atas peta, lalu salin hasil dari console browser.
-// =========================================================
 const DEBUG_CALIBRATION = false;
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -34,7 +31,7 @@ interface RegionData {
 
 interface JourneyNodeTemplate {
   id: string;
-  order: number; // 1..9 (dipakai membentuk lesson_g{grade}_{subject}_{order})
+  order: number;
   regionId: string;
   title: string;
   x: number;
@@ -79,7 +76,7 @@ type ProgressResponse = {
 };
 
 // =========================================================
-// MATH WORLD (dipetakan dari mathmap.png, urut dari bawah ke atas)
+// MATH WORLD
 // =========================================================
 
 const mathRegions: RegionData[] = [
@@ -102,42 +99,41 @@ const mathNodeTemplates: JourneyNodeTemplate[] = [
   { id: 'm9', order: 9, regionId: 'mr5', title: 'Division', x: 64, y: 18 },
 ];
 
-// Waypoint jalan (BUKAN node) — urut dari bawah ke atas, mengikuti lekuk jalan batu.
 const mathPathPoints: Point[] = [
   { x: 66, y: 99 },
-  { x: 62, y: 93 }, // m1
+  { x: 62, y: 93 },
   { x: 54, y: 89 },
-  { x: 47, y: 85 }, // m2
+  { x: 47, y: 85 },
   { x: 54, y: 80 },
-  { x: 55, y: 77 }, // m3
+  { x: 55, y: 77 },
   { x: 46, y: 74 },
-  { x: 38, y: 70 }, // m4
+  { x: 38, y: 70 },
   { x: 44, y: 67 },
   { x: 52, y: 65 },
-  { x: 61, y: 64 }, // jembatan
+  { x: 61, y: 64 },
   { x: 70, y: 62 },
-  { x: 77, y: 58 }, // m5
+  { x: 77, y: 58 },
   { x: 74, y: 54 },
   { x: 66, y: 50 },
   { x: 62, y: 48 },
-  { x: 60, y: 46 }, // m6
+  { x: 60, y: 46 },
   { x: 58, y: 42 },
   { x: 52, y: 39 },
-  { x: 47, y: 38 }, // m7
+  { x: 47, y: 38 },
   { x: 52, y: 35 },
   { x: 60, y: 35 },
   { x: 68, y: 33 },
-  { x: 72, y: 32 }, // m8
+  { x: 72, y: 32 },
   { x: 72, y: 29 },
-  { x: 70, y: 26 }, // gerbang tengah
+  { x: 70, y: 26 },
   { x: 66, y: 22 },
-  { x: 64, y: 18 }, // m9
+  { x: 64, y: 18 },
   { x: 70, y: 15 },
-  { x: 73, y: 13 }, // gerbang kastil
+  { x: 73, y: 13 },
 ];
 
 // =========================================================
-// ENGLISH WORLD (dipetakan dari engmap.png, urut dari bawah ke atas)
+// ENGLISH WORLD
 // =========================================================
 
 const englishRegions: RegionData[] = [
@@ -160,44 +156,43 @@ const englishNodeTemplates: JourneyNodeTemplate[] = [
   { id: 'e9', order: 9, regionId: 'er5', title: 'Speaking', x: 41, y: 27 },
 ];
 
-// Waypoint jalan English (BUKAN node) — urut dari bawah ke atas.
 const englishPathPoints: Point[] = [
   { x: 55, y: 100 },
-  { x: 55, y: 94 }, // e1
+  { x: 55, y: 94 },
   { x: 52, y: 91 },
   { x: 46, y: 88 },
-  { x: 45, y: 87 }, // e2
+  { x: 45, y: 87 },
   { x: 42, y: 84 },
   { x: 44, y: 82 },
   { x: 53, y: 81 },
   { x: 65, y: 79 },
-  { x: 71, y: 76 }, // e3
+  { x: 71, y: 76 },
   { x: 67, y: 72 },
   { x: 60, y: 69 },
-  { x: 55, y: 67 }, // e4
+  { x: 55, y: 67 },
   { x: 51, y: 63 },
   { x: 48, y: 60 },
   { x: 43, y: 58 },
-  { x: 40, y: 57 }, // e5
+  { x: 40, y: 57 },
   { x: 39, y: 53 },
   { x: 43, y: 50 },
-  { x: 51, y: 48 }, // e6
+  { x: 51, y: 48 },
   { x: 61, y: 47 },
   { x: 70, y: 45 },
-  { x: 72, y: 43 }, // e7
+  { x: 72, y: 43 },
   { x: 70, y: 40 },
   { x: 63, y: 39 },
   { x: 59, y: 37 },
-  { x: 68, y: 35 }, // e8
+  { x: 68, y: 35 },
   { x: 65, y: 32 },
   { x: 58, y: 31 },
   { x: 51, y: 30 },
   { x: 45, y: 28 },
-  { x: 41, y: 27 }, // e9
+  { x: 41, y: 27 },
   { x: 36, y: 24 },
   { x: 33, y: 21 },
   { x: 27, y: 18.5 },
-  { x: 26, y: 17.5 }, // pintu rumah salju
+  { x: 26, y: 17.5 },
 ];
 
 // =========================================================
@@ -271,9 +266,13 @@ function JourneyPageContent() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [locale] = useAppLocale();
+  const t = UI_TEXT[locale];
 
-  const initialSubject = searchParams.get('subject') === 'english' ? 'english' : 'math';
-  const [activeSubject, setActiveSubject] = useState<'math' | 'english'>(initialSubject);
+  const subjectParam = searchParams.get('subject');
+  const activeSubject: 'math' | 'english' =
+    subjectParam === 'english' ? 'english' : 'math';
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const [user, setUser] = useState<MeResponse | null>(null);
@@ -284,7 +283,6 @@ function JourneyPageContent() {
     volume: 0.5,
   });
 
-  // Load user & live progress dari backend
   useEffect(() => {
     async function loadJourneyProgress() {
       const token = localStorage.getItem('accessToken');
@@ -328,17 +326,8 @@ function JourneyPageContent() {
     void loadJourneyProgress();
   }, [router]);
 
-  // Sinkronkan activeSubject jika parameter URL berubah
-  useEffect(() => {
-    const subjectParam = searchParams.get('subject');
-    if (subjectParam === 'english' || subjectParam === 'math') {
-      setActiveSubject(subjectParam);
-    }
-  }, [searchParams]);
-
   const handleSubjectChange = (subject: 'math' | 'english') => {
     playClick();
-    setActiveSubject(subject);
     router.replace(`/journey?subject=${subject}`, { scroll: false });
   };
 
@@ -370,7 +359,6 @@ function JourneyPageContent() {
   const pathPoints = activeSubject === 'math' ? mathPathPoints : englishPathPoints;
   const routePath = createJourneyPath(pathPoints);
 
-  // Auto-scroll ke node aktif (posisi Mimo saat ini)
   useEffect(() => {
     if (loading || !scrollContainerRef.current) return;
     const container = scrollContainerRef.current;
@@ -381,12 +369,10 @@ function JourneyPageContent() {
         (activeNode.y / 100) * container.scrollHeight - container.clientHeight / 2;
       container.scrollTop = Math.max(0, targetScroll);
     } else {
-      // Semua node sudah selesai -> scroll ke puncak peta
       container.scrollTop = 0;
     }
   }, [activeSubject, loading, nodes]);
 
-  // Klik node -> masuk Battle, membawa subject, lessonId sesuai grade, regionId, dan grade
   const handleNodeClick = (node: JourneyNodeData) => {
     playClick();
     if (node.status !== 'locked') {
@@ -396,7 +382,6 @@ function JourneyPageContent() {
     }
   };
 
-  // Alat kalibrasi: klik di peta -> koordinat tercetak di console
   const handleCanvasDebugClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!DEBUG_CALIBRATION) return;
     const r = e.currentTarget.getBoundingClientRect();
@@ -411,7 +396,7 @@ function JourneyPageContent() {
         <div className="text-center">
           <div className="mx-auto h-11 w-11 animate-spin rounded-full border-4 border-white border-t-[#2788ed]" />
           <p className="mt-4 text-sm font-bold text-[#5879a3]">
-            Loading your adventure map...
+            {t.journey.loadingMap}
           </p>
         </div>
       </main>
@@ -433,7 +418,6 @@ function JourneyPageContent() {
       />
 
       <div className="relative z-10 flex h-[calc(100dvh-72px)] min-h-0 gap-[14px] pl-0 pr-[22px] pt-[12px] pb-[34px]">
-
         {/* SIDEBAR */}
         <aside className="relative -mt-[4px] hidden h-full w-[198px] shrink-0 overflow-visible lg:block">
           <svg
@@ -480,19 +464,18 @@ function JourneyPageContent() {
           </svg>
 
           <nav className="relative z-30 flex flex-col gap-[3px] px-[12px] pt-[24px]">
-            <SidebarItem icon="/assets/sidebar/home.png" label="Home" href="/dashboard" active={pathname === '/dashboard'} playClick={playClick} />
-            <SidebarItem icon="/assets/sidebar/learn.png" label="Learn" href="/learn" active={pathname?.startsWith('/learn')} playClick={playClick} />
-            <SidebarItem icon="/assets/sidebar/journey.png" label="Journey" href="/journey" active={pathname?.startsWith('/journey')} playClick={playClick} />
-            <SidebarItem icon="/assets/sidebar/progress.png" label="Progress" href="/progress" active={pathname?.startsWith('/progress')} playClick={playClick} />
-            <SidebarItem icon="/assets/sidebar/rewards.png" label="Rewards" href="/rewards" active={pathname?.startsWith('/rewards')} playClick={playClick} />
-            <SidebarItem icon="/assets/sidebar/profile.png" label="Profile" href="/profile" active={pathname?.startsWith('/profile')} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/home.png" label={t.nav.home} href="/dashboard" active={pathname === '/dashboard'} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/learn.png" label={t.nav.learn} href="/learn" active={pathname?.startsWith('/learn')} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/journey.png" label={t.nav.journey} href="/journey" active={pathname?.startsWith('/journey')} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/progress.png" label={t.nav.progress} href="/progress" active={pathname?.startsWith('/progress')} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/rewards.png" label={t.nav.rewards} href="/rewards" active={pathname?.startsWith('/rewards')} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/profile.png" label={t.nav.profile} href="/profile" active={pathname?.startsWith('/profile')} playClick={playClick} />
           </nav>
         </aside>
 
         {/* MAIN CONTENT */}
         <section className="min-h-0 min-w-0 flex-1 overflow-hidden pt-[max(0px,calc(4.3dvh_-_12px))] pb-[max(0px,calc(4.3dvh_-_12px))]">
           <div className="relative mx-auto flex h-full w-full max-w-[1428px] min-h-0 flex-col gap-[14px]">
-
             {/* SUBJECT SELECTOR */}
             <div className="relative z-20 mb-[-40px] flex justify-center">
               <div className="flex items-center gap-[6px] rounded-full border border-white bg-white/90 p-[6px] shadow-[0_6px_18px_rgba(18,63,124,0.12)] backdrop-blur-sm">
@@ -506,7 +489,7 @@ function JourneyPageContent() {
                 >
                   <CalculatorIcon className={`h-[20px] w-[20px] ${activeSubject !== 'math' ? 'grayscale opacity-60' : ''}`} />
                   <span className="text-[15px] font-black tracking-[-0.01em]">
-                    Mathematics
+                    {t.journey.mathTab}
                   </span>
                 </button>
 
@@ -520,7 +503,7 @@ function JourneyPageContent() {
                 >
                   <BookIcon className={`h-[22px] w-[22px] ${activeSubject !== 'english' ? 'grayscale opacity-60' : ''}`} />
                   <span className="text-[15px] font-black tracking-[-0.01em]">
-                    English
+                    {t.journey.englishTab}
                   </span>
                 </button>
               </div>
@@ -536,7 +519,6 @@ function JourneyPageContent() {
                 className="relative isolate aspect-[2/3] w-full min-h-[1200px]"
                 onClick={handleCanvasDebugClick}
               >
-
                 {/* WORLD BACKGROUND */}
                 <div
                   className="pointer-events-none absolute inset-0 z-0 bg-center bg-no-repeat opacity-90 transition-all duration-500"
@@ -594,7 +576,6 @@ function JourneyPageContent() {
                   />
                 </svg>
 
-                {/* DEBUG: tampilkan titik waypoint jalan */}
                 {DEBUG_CALIBRATION && (
                   <svg
                     viewBox="0 0 100 100"
@@ -708,7 +689,7 @@ function JourneyPageContent() {
 
                           {isActive && (
                             <span className="mt-[3px] rounded-full bg-[#e4f1ff] px-[7px] py-[1px] text-[8px] font-extrabold uppercase tracking-wide text-[#2b9aff]">
-                              Current
+                              {t.journey.currentBadge}
                             </span>
                           )}
                         </div>

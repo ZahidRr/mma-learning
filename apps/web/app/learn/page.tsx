@@ -1,44 +1,64 @@
 'use client';
-import { useMemo } from 'react';
+
+import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import useSound from 'use-sound';
-import Header from '../components/Header'; // <-- Import komponen Header
+import Header from '../components/Header';
+import { UI_TEXT, useAppLocale } from '../lib/i18n';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // =========================================================
 // TYPES
 // =========================================================
-type ProgressSession = {
-  subjectSlug: 'mathematics' | 'english';
-  skillName: string;
-  answeredQuestions: number;
-  targetQuestions: number;
-  status: 'IN_PROGRESS' | 'COMPLETED';
+type MeResponse = {
+  id: string;
+  email: string;
+  role: string;
+  learnerProfile: {
+    id: string;
+    displayName: string;
+    gradeLevel: number;
+    avatarKey: string | null;
+  } | null;
 };
 
-// =========================================================
-// MOCK DATA
-// =========================================================
-const mockProgress = {
-  totalXp: 2692,
-  streakDays: 7,
-  badges: 12,
-  sessions: [
-    {
-      subjectSlug: 'mathematics',
-      skillName: 'Addition Within 10',
-      answeredQuestions: 4,
-      targetQuestions: 10,
-      status: 'IN_PROGRESS',
-    },
-    {
-      subjectSlug: 'english',
-      skillName: 'Vocabulary',
-      answeredQuestions: 2,
-      targetQuestions: 8,
-      status: 'IN_PROGRESS',
-    },
-  ] as ProgressSession[],
+type LessonProgressItem = {
+  sessionId: string;
+  lesson: {
+    id: string;
+    title: string;
+    slug: string;
+    xpReward: number;
+  };
+  skill: {
+    id: string;
+    name: string;
+  };
+  subject: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED';
+  targetQuestions: number;
+  answeredQuestions: number;
+  correctAnswers: number;
+};
+
+type ProgressResponse = {
+  profile: {
+    displayName: string;
+    gradeLevel: number;
+    totalXp: number;
+  };
+  summary: {
+    totalXp: number;
+    completedLessons: number;
+    masteredSkills: number;
+  };
+  lessonProgress: LessonProgressItem[];
 };
 
 // =========================================================
@@ -47,29 +67,123 @@ const mockProgress = {
 export default function LearnPage() {
   const pathname = usePathname();
   const router = useRouter();
+  const [locale] = useAppLocale();
+  const t = UI_TEXT[locale];
 
-  // Inisialisasi Hook Suara
   const [playClick] = useSound('/assets/sounds/click.mp3', { volume: 0.5 });
 
-  const displayName = 'Explorer';
-  const gradeLevel = 1;
-  const totalXp = mockProgress.totalXp;
-  const streakDays = mockProgress.streakDays;
-  const badges = mockProgress.badges;
+  const [user, setUser] = useState<MeResponse | null>(null);
+  const [progress, setProgress] = useState<ProgressResponse | null>(null);
 
-  const mathSession = useMemo(
-    () => mockProgress.sessions.find((s) => s.subjectSlug === 'mathematics') ?? null,
-    []
-  );
-  const englishSession = useMemo(
-    () => mockProgress.sessions.find((s) => s.subjectSlug === 'english') ?? null,
-    []
-  );
+  useEffect(() => {
+    async function loadLearnProgress() {
+      const token = window.localStorage.getItem('accessToken');
+      const storedUserId = window.localStorage.getItem('userId');
 
-  const mathAnswered = mathSession?.answeredQuestions ?? 4;
-  const mathTarget = mathSession?.targetQuestions ?? 10;
-  const englishAnswered = englishSession?.answeredQuestions ?? 2;
-  const englishTarget = englishSession?.targetQuestions ?? 8;
+      if (!token || !storedUserId) {
+        router.replace('/login');
+        return;
+      }
+
+      try {
+        const meRes = await fetch(`${API_BASE_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!meRes.ok) {
+          window.localStorage.removeItem('accessToken');
+          window.localStorage.removeItem('userId');
+          router.replace('/login');
+          return;
+        }
+
+        const meData: MeResponse = await meRes.json();
+        setUser(meData);
+
+        const progressRes = await fetch(`${API_BASE_URL}/progress/users/${meData.id}`);
+        if (progressRes.ok) {
+          const progressData: ProgressResponse = await progressRes.json();
+          setProgress(progressData);
+        } else {
+          setProgress(null);
+        }
+      } catch (err) {
+        console.error('Learn load error:', err);
+      }
+    }
+
+    void loadLearnProgress();
+  }, [router]);
+
+  const displayName =
+    progress?.profile.displayName ?? user?.learnerProfile?.displayName ?? 'Explorer';
+  const gradeLevel =
+    progress?.profile.gradeLevel ?? user?.learnerProfile?.gradeLevel ?? 1;
+  const safeGrade = Math.min(Math.max(gradeLevel, 1), 6);
+  const totalXp = progress?.summary.totalXp ?? progress?.profile.totalXp ?? 0;
+  const streakDays = 7;
+  const badges = Math.max(progress?.summary.completedLessons ?? 0, 0);
+
+  const mathSession = useMemo(() => {
+    const sessions = (progress?.lessonProgress ?? []).filter(
+      (s) => s.subject.slug === 'mathematics',
+    );
+    return (
+      sessions.find((s) => s.status === 'IN_PROGRESS') ??
+      sessions[0] ??
+      null
+    );
+  }, [progress]);
+
+  const englishSession = useMemo(() => {
+    const sessions = (progress?.lessonProgress ?? []).filter(
+      (s) => s.subject.slug === 'english',
+    );
+    return (
+      sessions.find((s) => s.status === 'IN_PROGRESS') ??
+      sessions[0] ??
+      null
+    );
+  }, [progress]);
+
+  const mathAnswered = mathSession?.answeredQuestions ?? 0;
+  const mathTarget = mathSession?.targetQuestions ?? 12;
+  const englishAnswered = englishSession?.answeredQuestions ?? 0;
+  const englishTarget = englishSession?.targetQuestions ?? 12;
+
+  const completedLessonIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const item of progress?.lessonProgress ?? []) {
+      if (item.status === 'COMPLETED') {
+        ids.add(item.lesson.id);
+      }
+    }
+    return ids;
+  }, [progress]);
+
+  const timelineNodes = useMemo(() => {
+    const items = [
+      { order: 1, label: t.learn.nodeNumbers },
+      { order: 3, label: t.learn.nodeAddition },
+      { order: 4, label: t.learn.nodeSubtraction },
+      { order: 8, label: t.learn.nodeMultiplication },
+      { order: 9, label: t.learn.nodeDivision },
+    ];
+    let foundActive = false;
+    return items.map((item) => {
+      const lessonId = `lesson_g${safeGrade}_math_${String(item.order).padStart(2, '0')}`;
+      let status: 'completed' | 'active' | 'locked';
+      if (completedLessonIds.has(lessonId)) {
+        status = 'completed';
+      } else if (!foundActive) {
+        status = 'active';
+        foundActive = true;
+      } else {
+        status = 'locked';
+      }
+      return { ...item, status };
+    });
+  }, [completedLessonIds, safeGrade, t.learn]);
 
   const handleOpenJourney = (subject: 'math' | 'english') => {
     playClick();
@@ -81,9 +195,7 @@ export default function LearnPage() {
       className="relative h-[100dvh] w-full overflow-hidden bg-[#72c9fa] bg-[length:100%_100%] bg-center bg-no-repeat select-none"
       style={{ backgroundImage: "url('/assets/dashboard/dashboard-bg.png')" }}
     >
-      {/* =================================================
-          HEADER
-      ================================================== */}
+      {/* HEADER */}
       <Header
         totalXp={totalXp}
         streakDays={streakDays}
@@ -91,15 +203,10 @@ export default function LearnPage() {
         gradeLevel={gradeLevel}
       />
 
-      {/* =================================================
-          BODY (SIDEBAR + LEARN CONTENT)
-      ================================================== */}
+      {/* BODY (SIDEBAR + LEARN CONTENT) */}
       <div className="relative z-10 flex h-[calc(100dvh-72px)] min-h-0 gap-[14px] pl-0 pr-[22px] pt-[12px] pb-[34px]">
-        {/* ===============================================
-            SIDEBAR
-        ================================================ */}
+        {/* SIDEBAR */}
         <aside className="relative hidden h-full w-[198px] shrink-0 overflow-visible lg:block -mt-[4px]">
-          {/* FOLIAGE OVERLAY KIRI ATAS */}
           <svg
             viewBox="0 0 110 85"
             aria-hidden="true"
@@ -113,7 +220,6 @@ export default function LearnPage() {
             <path d="M0 26 C16 28 28 38 30 52 C14 48 4 38 0 26 Z" fill="#52b548" />
             <path d="M0 42 C10 44 18 54 18 66 C6 62 0 52 0 42 Z" fill="#38943c" />
           </svg>
-          {/* BLUE SIDEBAR S-CURVE SVG */}
           <svg
             viewBox="0 0 198 540"
             aria-hidden="true"
@@ -181,59 +287,56 @@ export default function LearnPage() {
               strokeWidth="2.2"
               strokeLinecap="round"
             />
-            {/* KABUT AWAN PUTIH DI BAWAH SIDEBAR */}
             <ellipse cx="38" cy="468" rx="52" ry="22" fill="#eef9ff" opacity="0.85" filter="url(#cloudMistBlur)" />
             <ellipse cx="22" cy="482" rx="40" ry="18" fill="#ffffff" opacity="0.9" filter="url(#cloudMistBlur)" />
           </svg>
-          {/* SIDEBAR MENU ITEMS */}
           <nav className="relative z-30 flex flex-col gap-[3px] px-[12px] pt-[24px]">
             <SidebarItem
               icon="/assets/sidebar/home.png"
-              label="Home"
+              label={t.nav.home}
               href="/dashboard"
               active={pathname === '/dashboard'}
               playClick={playClick}
             />
             <SidebarItem
               icon="/assets/sidebar/learn.png"
-              label="Learn"
+              label={t.nav.learn}
               href="/learn"
               active={pathname?.startsWith('/learn')}
               playClick={playClick}
             />
             <SidebarItem
               icon="/assets/sidebar/journey.png"
-              label="Journey"
+              label={t.nav.journey}
               href="/journey"
               active={pathname?.startsWith('/journey')}
               playClick={playClick}
             />
             <SidebarItem
               icon="/assets/sidebar/progress.png"
-              label="Progress"
+              label={t.nav.progress}
               href="/progress"
               active={pathname?.startsWith('/progress')}
               playClick={playClick}
             />
             <SidebarItem
               icon="/assets/sidebar/rewards.png"
-              label="Rewards"
+              label={t.nav.rewards}
               href="/rewards"
               active={pathname?.startsWith('/rewards')}
               playClick={playClick}
             />
             <SidebarItem
               icon="/assets/sidebar/profile.png"
-              label="Profile"
+              label={t.nav.profile}
               href="/profile"
               active={pathname?.startsWith('/profile')}
               playClick={playClick}
             />
           </nav>
         </aside>
-        {/* ===============================================
-            MAIN CONTENT AREA
-        ================================================ */}
+
+        {/* MAIN CONTENT AREA */}
         <section className="min-h-0 min-w-0 flex-1 overflow-hidden pt-[max(0px,calc(4.3dvh_-_12px))] pb-[max(0px,calc(7.4dvh_-_34px))]">
           <div className="mx-auto flex h-full w-full max-w-[1428px] min-h-0 flex-col justify-between">
             {/* 1. TOP SECTION: CHOOSE A SUBJECT */}
@@ -248,10 +351,10 @@ export default function LearnPage() {
                   />
                   <div>
                     <h1 className="text-[34px] font-black leading-[1.05] tracking-[-0.035em] text-[#0c347a]">
-                      Choose a Subject
+                      {t.learn.chooseSubject}
                     </h1>
                     <p className="mt-[6px] text-[17px] font-bold leading-tight text-[#627b9c]">
-                      Pick a subject and start your learning adventure!
+                      {t.learn.pickSubjectSub}
                     </p>
                   </div>
                 </div>
@@ -259,7 +362,6 @@ export default function LearnPage() {
 
               {/* SUBJECT + MASCOT CARDS */}
               <div className="grid min-h-0 flex-1 grid-cols-[1fr_1.06fr_0.77fr] gap-[16px]">
-
                 {/* MATHEMATICS CARD */}
                 <div className="group relative flex h-full min-h-0 flex-col overflow-hidden rounded-[32px] border-[5px] border-white/95 bg-white shadow-[0_5px_18px_rgba(35,138,83,0.10)] transition hover:-translate-y-1 hover:shadow-lg">
                   <div className="relative h-[52%] w-full shrink-0 overflow-hidden bg-[#eff8f2]">
@@ -277,10 +379,10 @@ export default function LearnPage() {
                         </div>
                         <div className="min-w-0">
                           <h3 className="text-[21px] font-black leading-tight tracking-[-0.02em] text-[#0c347a]">
-                            Mathematics
+                            {t.learn.mathTitle}
                           </h3>
                           <p className="mt-[4px] text-[13px] font-bold leading-[1.25] text-[#6782a2]">
-                            Build, solve, and grow your number skills!
+                            {t.learn.mathDesc}
                           </p>
                         </div>
                       </div>
@@ -288,14 +390,14 @@ export default function LearnPage() {
                         <p className="text-[17px] font-black leading-none text-[#238a53]">
                           {mathAnswered} / {mathTarget}
                         </p>
-                        <p className="mt-[5px] text-[11px] font-bold text-[#5c7a97]">done</p>
+                        <p className="mt-[5px] text-[11px] font-bold text-[#5c7a97]">{t.learn.done}</p>
                       </div>
                     </div>
                     <div className="mt-[8px] shrink-0">
                       <div className="mb-[9px] h-[6px] w-full overflow-hidden rounded-full bg-[#dff3e6]">
                         <div
                           className="h-full rounded-full bg-[#3ec073]"
-                          style={{ width: `${(mathAnswered / mathTarget) * 100}%` }}
+                          style={{ width: `${Math.min((mathAnswered / Math.max(mathTarget, 1)) * 100, 100)}%` }}
                         />
                       </div>
                       <button
@@ -303,7 +405,7 @@ export default function LearnPage() {
                         onClick={() => handleOpenJourney('math')}
                         className="flex h-[48px] w-full items-center justify-center rounded-[16px] bg-[linear-gradient(180deg,#25cf7a_0%,#16b86b_100%)] text-[16px] font-extrabold text-white shadow-[0_6px_14px_rgba(28,184,107,0.22)] transition hover:brightness-105"
                       >
-                        Continue Learning →
+                        {t.learn.continueLearning}
                       </button>
                     </div>
                   </div>
@@ -326,10 +428,10 @@ export default function LearnPage() {
                         </div>
                         <div className="min-w-0">
                           <h3 className="text-[21px] font-black leading-tight tracking-[-0.02em] text-[#0c347a]">
-                            English
+                            {t.learn.englishTitle}
                           </h3>
                           <p className="mt-[4px] text-[13px] font-bold leading-[1.25] text-[#6782a2]">
-                            Read, write, and discover amazing stories!
+                            {t.learn.englishDesc}
                           </p>
                         </div>
                       </div>
@@ -337,14 +439,14 @@ export default function LearnPage() {
                         <p className="text-[17px] font-black leading-none text-[#d98500]">
                           {englishAnswered} / {englishTarget}
                         </p>
-                        <p className="mt-[5px] text-[11px] font-bold text-[#5c7a97]">done</p>
+                        <p className="mt-[5px] text-[11px] font-bold text-[#5c7a97]">{t.learn.done}</p>
                       </div>
                     </div>
                     <div className="mt-[8px] shrink-0">
                       <div className="mb-[9px] h-[6px] w-full overflow-hidden rounded-full bg-[#fae8c6]">
                         <div
                           className="h-full rounded-full bg-[#f4a61d]"
-                          style={{ width: `${(englishAnswered / englishTarget) * 100}%` }}
+                          style={{ width: `${Math.min((englishAnswered / Math.max(englishTarget, 1)) * 100, 100)}%` }}
                         />
                       </div>
                       <button
@@ -352,13 +454,13 @@ export default function LearnPage() {
                         onClick={() => handleOpenJourney('english')}
                         className="flex h-[48px] w-full items-center justify-center rounded-[16px] bg-[linear-gradient(180deg,#ffc233_0%,#f2a20a_100%)] text-[16px] font-extrabold text-white shadow-[0_6px_14px_rgba(242,162,10,0.22)] transition hover:brightness-105"
                       >
-                        Explore Lessons →
+                        {t.learn.exploreLessons}
                       </button>
                     </div>
                   </div>
                 </div>
 
-                {/* KEEP GOING MASCOT CARD (DENGAN BACKGROUND CARDMIMO, FRAME DECORATIVE, & MIMO PROPORSIONAL) */}
+                {/* KEEP GOING MASCOT CARD */}
                 <div className="relative h-full min-h-0 overflow-visible text-center">
                   <div className="absolute inset-0 z-0 overflow-hidden rounded-[32px] border-[5px] border-white/95 bg-[linear-gradient(180deg,#f4faff_0%,#dcedff_100%)] shadow-[0_5px_18px_rgba(35,91,155,0.10)]">
                     <img
@@ -375,37 +477,29 @@ export default function LearnPage() {
                     className="pointer-events-none absolute -top-[30px] left-1/2 z-10 w-[112%] max-w-[280px] -translate-x-1/2 scale-110 object-contain drop-shadow-[0_10px_15px_rgba(18,72,143,0.15)]"
                   />
 
-                  {/* TEXT PANEL - DECORATIVE LAYERED DESIGN */}
+                  {/* TEXT PANEL */}
                   <div className="absolute bottom-[16px] left-[16px] right-[16px] z-20 flex min-h-[96px] flex-col items-center justify-center">
-                    {/* Lapisan Blur Putih Belakang */}
                     <div className="absolute inset-0 rounded-[20px] bg-white/40 backdrop-blur-md" />
-                    {/* Lapisan Warna Kuning Atas dengan Bintang */}
                     <div className="absolute inset-[3px] rounded-[17px] bg-[#fff1d2] shadow-[0_4px_12px_rgba(153,111,39,0.08)] border border-[#ffe9bc] flex items-center justify-between px-[14px]">
-
-                      {/* Bintang Kiri */}
                       <svg viewBox="0 0 24 24" className="h-[20px] w-[20px] text-[#ffc229] drop-shadow-sm" fill="currentColor">
                         <path d="M12 2L14.4 9.6H22.4L15.9 14.3L18.4 22L12 17.3L5.6 22L8.1 14.3L1.6 9.6H9.6L12 2Z" />
                       </svg>
 
-                      {/* Teks Tengah */}
                       <div className="flex flex-col items-center flex-1 px-[8px]">
                         <h3 className="text-[19px] font-black leading-tight tracking-[-0.01em] text-[#0c347a]">
-                          Keep Going!
+                          {t.learn.keepGoingTitle}
                         </h3>
                         <p className="mt-[2px] text-[12.5px] font-bold leading-[1.35] text-[#183f7b]">
-                          You&apos;re doing great<br /> on your learning journey!
+                          {t.learn.keepGoingLine1}<br /> {t.learn.keepGoingLine2}
                         </p>
                       </div>
 
-                      {/* Bintang Kanan */}
                       <svg viewBox="0 0 24 24" className="h-[20px] w-[20px] text-[#ffc229] drop-shadow-sm" fill="currentColor">
                         <path d="M12 2L14.4 9.6H22.4L15.9 14.3L18.4 22L12 17.3L5.6 22L8.1 14.3L1.6 9.6H9.6L12 2Z" />
                       </svg>
-
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
 
@@ -419,7 +513,7 @@ export default function LearnPage() {
                       <TrophyIcon className="h-[22px] w-[22px] text-[#f2a20a]" />
                     </div>
                     <h2 className="text-[22px] font-black tracking-[-0.02em] text-[#0c347a]">
-                      My Learning Journey
+                      {t.learn.myLearningJourney}
                     </h2>
                   </div>
                   <button
@@ -427,21 +521,27 @@ export default function LearnPage() {
                     onClick={() => handleOpenJourney('math')}
                     className="text-[14px] font-extrabold text-[#2a80f0] transition hover:text-[#115cc2]"
                   >
-                    View All →
+                    {t.learn.viewAll}
                   </button>
                 </div>
                 <div className="mt-[8px] flex min-h-0 flex-1 items-start justify-between px-[4px]">
-                  <JourneyNode label="Numbers" subLabel="Mathematics" status="completed" />
-                  <JourneyConnector status="completed" />
-                  <JourneyNode label="Addition" subLabel="Mathematics" status="active" />
-                  <JourneyConnector status="locked" />
-                  <JourneyNode label="Subtraction" subLabel="Mathematics" status="locked" />
-                  <JourneyConnector status="locked" />
-                  <JourneyNode label="Multiplication" subLabel="Mathematics" status="locked" />
-                  <JourneyConnector status="locked" />
-                  <JourneyNode label="Division" subLabel="Mathematics" status="locked" />
+                  {timelineNodes.map((node, idx) => (
+                    <div key={node.order} className="contents">
+                      <JourneyNode
+                        label={node.label}
+                        subLabel={t.learn.mathTitle}
+                        status={node.status}
+                      />
+                      {idx < timelineNodes.length - 1 && (
+                        <JourneyConnector
+                          status={node.status === 'completed' ? 'completed' : 'locked'}
+                        />
+                      )}
+                    </div>
+                  ))}
                 </div>
               </section>
+
               {/* STATS CARD */}
               <section className="flex h-full min-h-0 flex-col rounded-[28px] border border-white/80 bg-white/95 px-[20px] pb-[12px] pt-[16px] shadow-[0_8px_30px_rgba(23,68,130,0.06)]">
                 <div className="flex h-[42px] shrink-0 items-center gap-[10px]">
@@ -451,7 +551,7 @@ export default function LearnPage() {
                     </svg>
                   </div>
                   <h2 className="text-[22px] font-black tracking-[-0.02em] text-[#0c347a]">
-                    My Stats
+                    {t.learn.myStats}
                   </h2>
                 </div>
                 <div className="mt-[8px] grid min-h-0 flex-1 grid-cols-3 items-center divide-x divide-[#e2eaf4]">
@@ -461,14 +561,14 @@ export default function LearnPage() {
                       <p className="text-[17px] font-black leading-tight text-[#143975]">
                         {totalXp.toLocaleString()}
                       </p>
-                      <p className="text-[11px] font-bold text-[#6d84a3]">Total XP</p>
+                      <p className="text-[11px] font-bold text-[#6d84a3]">{t.learn.totalXp}</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-center justify-center gap-[5px]">
                     <img src="/assets/sidebar/streak.png" className="h-[34px] w-[34px] object-contain" alt="Streak" />
                     <div className="text-center">
                       <p className="text-[17px] font-black leading-tight text-[#143975]">{streakDays}</p>
-                      <p className="text-[11px] font-bold text-[#6d84a3]">Day Streak</p>
+                      <p className="text-[11px] font-bold text-[#6d84a3]">{t.learn.dayStreak}</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-center justify-center gap-[5px]">
@@ -481,7 +581,7 @@ export default function LearnPage() {
                     </div>
                     <div className="text-center">
                       <p className="text-[17px] font-black leading-tight text-[#143975]">{badges}</p>
-                      <p className="text-[11px] font-bold text-[#6d84a3]">Badges</p>
+                      <p className="text-[11px] font-bold text-[#6d84a3]">{t.learn.badges}</p>
                     </div>
                   </div>
                 </div>
@@ -572,6 +672,7 @@ function JourneyNode({
     </div>
   );
 }
+
 function JourneyConnector({ status }: { status: 'completed' | 'locked' }) {
   return (
     <div
@@ -601,6 +702,7 @@ function BookIconOutline({ className }: { className?: string }) {
     </svg>
   );
 }
+
 function TrophyIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -608,6 +710,7 @@ function TrophyIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
 function CalculatorIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 40 40" fill="none" className={className}>
@@ -622,6 +725,7 @@ function CalculatorIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
 function BookIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 42 42" fill="none" className={className}>

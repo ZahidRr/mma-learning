@@ -2,9 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { UI_TEXT, useAppLocale } from '../lib/i18n';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [locale] = useAppLocale();
+  const t = UI_TEXT[locale];
 
   return (
     <aside className="relative hidden h-full w-[198px] shrink-0 overflow-visible lg:block -mt-[4px]">
@@ -50,12 +53,12 @@ export default function Sidebar() {
 
       {/* MENU NAVIGASI DENGAN DETEKSI RUTE OTOMATIS */}
       <nav className="relative z-30 flex flex-col gap-[3px] px-[12px] pt-[24px]">
-        <SidebarItem icon="/assets/sidebar/home.png" label="Home" href="/dashboard" active={pathname === '/dashboard'} />
-        <SidebarItem icon="/assets/sidebar/learn.png" label="Learn" href="/learn" active={pathname?.startsWith('/learn')} />
-        <SidebarItem icon="/assets/sidebar/journey.png" label="Journey" href="/journey" active={pathname?.startsWith('/journey')} />
-        <SidebarItem icon="/assets/sidebar/progress.png" label="Progress" href="/progress" active={pathname?.startsWith('/progress')} />
-        <SidebarItem icon="/assets/sidebar/rewards.png" label="Rewards" href="/rewards" active={pathname?.startsWith('/rewards')} />
-        <SidebarItem icon="/assets/sidebar/profile.png" label="Profile" href="/profile" active={pathname?.startsWith('/profile')} />
+        <SidebarItem icon="/assets/sidebar/home.png" label={t.nav.home} href="/dashboard" active={pathname === '/dashboard'} />
+        <SidebarItem icon="/assets/sidebar/learn.png" label={t.nav.learn} href="/learn" active={pathname?.startsWith('/learn')} />
+        <SidebarItem icon="/assets/sidebar/journey.png" label={t.nav.journey} href="/journey" active={pathname?.startsWith('/journey')} />
+        <SidebarItem icon="/assets/sidebar/progress.png" label={t.nav.progress} href="/progress" active={pathname?.startsWith('/progress')} />
+        <SidebarItem icon="/assets/sidebar/rewards.png" label={t.nav.rewards} href="/rewards" active={pathname?.startsWith('/rewards')} />
+        <SidebarItem icon="/assets/sidebar/profile.png" label={t.nav.profile} href="/profile" active={pathname?.startsWith('/profile')} />
       </nav>
     </aside>
   );

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import useSound from 'use-sound';
 import Header from '../components/Header';
+import { UI_TEXT, useAppLocale } from '../lib/i18n';
 
 // =========================================================
 // TYPES
@@ -110,13 +111,16 @@ type ProgressResponse = {
 export default function DashboardPage() {
   const router = useRouter();
   const pathname = usePathname();
+  const [locale] = useAppLocale();
+  const t = UI_TEXT[locale];
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   const [user, setUser] = useState<MeResponse | null>(null);
   const [progress, setProgress] = useState<ProgressResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Inisialisasi hook audio
   const [playClick] = useSound('/assets/sounds/click.mp3', { volume: 0.5 });
 
   // =======================================================
@@ -129,7 +133,7 @@ export default function DashboardPage() {
       const storedUserId = localStorage.getItem('userId');
 
       if (!token || !storedUserId) {
-        console.warn("Token atau UserId tidak ditemukan. Mengarahkan ke login...");
+        console.warn('Token atau UserId tidak ditemukan. Mengarahkan ke login...');
         router.replace('/login');
         return;
       }
@@ -138,14 +142,14 @@ export default function DashboardPage() {
         setLoading(true);
         setError('');
 
-        const meResponse = await fetch('http://localhost:3001/auth/me', {
+        const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
         if (!meResponse.ok) {
-          console.warn("Gagal validasi token di auth/me. Menghapus sesi.");
+          console.warn('Gagal validasi token di auth/me. Menghapus sesi.');
           localStorage.removeItem('accessToken');
           localStorage.removeItem('userId');
           router.replace('/login');
@@ -156,12 +160,11 @@ export default function DashboardPage() {
         setUser(meData);
 
         const progressResponse = await fetch(
-          `http://localhost:3001/progress/users/${meData.id}`,
+          `${API_BASE_URL}/progress/users/${meData.id}`,
         );
 
         if (!progressResponse.ok) {
           if (progressResponse.status === 404) {
-            console.log("Progres belum ada untuk user ini. Menampilkan dashboard kosong.");
             setProgress(null);
           } else {
             throw new Error('Failed to load learning progress.');
@@ -171,7 +174,7 @@ export default function DashboardPage() {
           setProgress(progressData);
         }
       } catch (err) {
-        console.error("Dashboard Load Error:", err);
+        console.error('Dashboard Load Error:', err);
         setError(
           err instanceof Error ? err.message : 'Something went wrong.',
         );
@@ -181,7 +184,7 @@ export default function DashboardPage() {
     }
 
     void loadDashboard();
-  }, [router]);
+  }, [router, API_BASE_URL]);
 
   // =======================================================
   // HANDLERS UNTUK MENGARAHKAN KE JOURNEY MAP
@@ -206,6 +209,11 @@ export default function DashboardPage() {
 
   const activeSubjectKey: 'math' | 'english' =
     activeSession?.subject.slug === 'english' ? 'english' : 'math';
+
+  const activeSubjectDisplay =
+    activeSubjectKey === 'english'
+      ? t.dashboard.englishTitle
+      : t.dashboard.mathTitle;
 
   const mathSession = useMemo(() => {
     return (
@@ -232,7 +240,7 @@ export default function DashboardPage() {
     progress?.profile.gradeLevel ?? user?.learnerProfile?.gradeLevel ?? 1;
 
   const rawXp = progress?.summary.totalXp ?? 0;
-  const totalXp = rawXp > 0 ? rawXp : 2692; // default fallback
+  const totalXp = rawXp > 0 ? rawXp : 2692;
   const streakDays = 7;
 
   const dailyGoal = Math.min(
@@ -253,7 +261,7 @@ export default function DashboardPage() {
         <div className="text-center">
           <div className="mx-auto h-11 w-11 animate-spin rounded-full border-4 border-white border-t-[#2788ed]" />
           <p className="mt-4 text-sm font-bold text-[#5879a3]">
-            Preparing your adventure...
+            {t.dashboard.preparing}
           </p>
         </div>
       </main>
@@ -271,9 +279,7 @@ export default function DashboardPage() {
         backgroundImage: "url('/assets/dashboard/dashboard-bg.png')",
       }}
     >
-      {/* =================================================
-          HEADER COMPONENT
-      ================================================== */}
+      {/* HEADER COMPONENT */}
       <Header
         totalXp={totalXp}
         streakDays={streakDays}
@@ -281,16 +287,10 @@ export default function DashboardPage() {
         gradeLevel={gradeLevel}
       />
 
-      {/* =================================================
-          BODY
-      ================================================== */}
+      {/* BODY */}
       <div className="relative z-10 flex h-[calc(100dvh-72px)] gap-[14px] pl-0 pr-[22px] pt-[12px] pb-[34px]">
-
-        {/* ===============================================
-            SIDEBAR (S-Curve Presisi & Gradasi Menyatu ke Awan)
-        ================================================ */}
+        {/* SIDEBAR */}
         <aside className="relative hidden h-full w-[198px] shrink-0 overflow-visible lg:block -mt-[4px]">
-          {/* FOLIAGE OVERLAY KIRI ATAS */}
           <svg
             viewBox="0 0 110 85"
             aria-hidden="true"
@@ -305,7 +305,6 @@ export default function DashboardPage() {
             <path d="M0 42 C10 44 18 54 18 66 C6 62 0 52 0 42 Z" fill="#38943c" />
           </svg>
 
-          {/* BLUE SIDEBAR S-CURVE SVG */}
           <svg
             viewBox="0 0 198 540"
             aria-hidden="true"
@@ -380,7 +379,6 @@ export default function DashboardPage() {
               strokeLinecap="round"
             />
 
-            {/* KABUT AWAN PUTIH DI BAWAH SIDEBAR */}
             <ellipse cx="38" cy="468" rx="52" ry="22" fill="#eef9ff" opacity="0.85" filter="url(#cloudMistBlur)" />
             <ellipse cx="22" cy="482" rx="40" ry="18" fill="#ffffff" opacity="0.9" filter="url(#cloudMistBlur)" />
           </svg>
@@ -389,42 +387,42 @@ export default function DashboardPage() {
           <nav className="relative z-30 flex flex-col gap-[3px] px-[12px] pt-[24px]">
             <SidebarItem
               icon="/assets/sidebar/home.png"
-              label="Home"
+              label={t.nav.home}
               href="/dashboard"
               active={pathname === '/dashboard'}
               playClick={playClick}
             />
             <SidebarItem
               icon="/assets/sidebar/learn.png"
-              label="Learn"
+              label={t.nav.learn}
               href="/learn"
               active={pathname?.startsWith('/learn')}
               playClick={playClick}
             />
             <SidebarItem
               icon="/assets/sidebar/journey.png"
-              label="Journey"
+              label={t.nav.journey}
               href="/journey"
               active={pathname?.startsWith('/journey')}
               playClick={playClick}
             />
             <SidebarItem
               icon="/assets/sidebar/progress.png"
-              label="Progress"
+              label={t.nav.progress}
               href="/progress"
               active={pathname?.startsWith('/progress')}
               playClick={playClick}
             />
             <SidebarItem
               icon="/assets/sidebar/rewards.png"
-              label="Rewards"
+              label={t.nav.rewards}
               href="/rewards"
               active={pathname?.startsWith('/rewards')}
               playClick={playClick}
             />
             <SidebarItem
               icon="/assets/sidebar/profile.png"
-              label="Profile"
+              label={t.nav.profile}
               href="/profile"
               active={pathname?.startsWith('/profile')}
               playClick={playClick}
@@ -432,14 +430,10 @@ export default function DashboardPage() {
           </nav>
         </aside>
 
-        {/* ===============================================
-            MAIN CONTENT SHELL
-        ================================================ */}
+        {/* MAIN CONTENT SHELL */}
         <section className="min-w-0 flex-1">
           <div className="mx-auto grid h-full min-h-0 w-full max-w-[1380px] grid-rows-[46%_54%]">
-            {/* ===========================================
-                TOP WHITE SHELL (WELCOME HERO)
-            ============================================ */}
+            {/* TOP WHITE SHELL (WELCOME HERO) */}
             <div className="min-h-0 rounded-t-[30px] bg-white/95 px-[8px] pt-[8px] pb-[5px] shadow-[0_4px_20px_rgba(21,71,138,0.06)]">
               <section className="relative h-full min-h-0 overflow-hidden rounded-[22px]">
                 <img
@@ -461,20 +455,18 @@ export default function DashboardPage() {
                 {/* WELCOME TITLE */}
                 <div className="absolute left-[4%] top-[12%] z-10">
                   <h1 className="flex items-center gap-[10px] text-[42px] font-black leading-[0.95] tracking-[-0.04em] text-[#0c347a]">
-                    <span>Welcome back!</span>
+                    <span>{t.dashboard.welcomeBack}</span>
                     <svg viewBox="0 0 36 36" className="h-[32px] w-[32px] shrink-0" fill="none">
                       <path d="M18 2L22.2 13.8L34 18L22.2 22.2L18 34L13.8 22.2L2 18L13.8 13.8L18 2Z" fill="#ffc229" />
                     </svg>
                   </h1>
 
                   <p className="mt-[5px] text-[17px] font-bold leading-[1.15] tracking-[-0.01em] text-[#5e789c]">
-                    Ready for another adventure today?
+                    {t.dashboard.readyAdventure}
                   </p>
                 </div>
 
-                {/* =======================================
-                    ACTIVE / NEXT LEARNING CARD
-                ======================================== */}
+                {/* ACTIVE / NEXT LEARNING CARD */}
                 <div className="absolute bottom-[30px] left-[4%] z-10 h-[114px] w-[54%] max-w-[710px] min-w-[560px] overflow-hidden rounded-[20px] border border-white bg-white/95 shadow-[0_12px_28px_rgba(29,82,150,0.14)] backdrop-blur-sm">
                   <div className="grid h-full grid-cols-[64px_minmax(0,1fr)_215px] grid-rows-[1fr_34px] items-center px-[18px] py-[12px]">
                     <div className="row-span-2 flex h-[54px] w-[54px] items-center justify-center rounded-[15px] bg-[linear-gradient(180deg,#4fd185_0%,#34ad67_100%)] shadow-[0_6px_12px_rgba(52,173,103,0.25)]">
@@ -483,7 +475,7 @@ export default function DashboardPage() {
 
                     <div className="min-w-0 self-end pb-[2px] pl-[4px]">
                       <p className="text-[12px] font-extrabold leading-none text-[#1c498c]">
-                        {activeSession?.subject.name ?? 'Mathematics'}
+                        {activeSubjectDisplay}
                       </p>
 
                       <h2 className="mt-[5px] flex items-center truncate text-[22px] font-black leading-none tracking-[-0.025em] text-[#0c347a]">
@@ -502,30 +494,28 @@ export default function DashboardPage() {
                         onClick={() => handleStartSubject(activeSubjectKey)}
                         className="flex h-[50px] w-[202px] items-center justify-center gap-[10px] rounded-[15px] bg-[linear-gradient(180deg,#2b9aff_0%,#116bf2_100%)] text-[14px] font-extrabold text-white shadow-[0_8px_18px_rgba(17,107,242,0.32)] transition-transform duration-200 hover:-translate-y-[1px]"
                       >
-                        <span>Continue Learning</span>
+                        <span>{t.dashboard.continueLearning}</span>
                         <span className="text-[17px] leading-none">→</span>
                       </button>
                     </div>
 
                     <div className="flex min-w-0 items-center gap-[16px] self-start pl-[4px] pt-[5px]">
                       <span className="shrink-0 text-[12px] font-bold text-[#627b9c]">
-                        {activeSession?.answeredQuestions ?? 4} /{' '}
-                        {activeSession?.targetQuestions ?? 10} questions
+                        {activeSession?.answeredQuestions ?? 0} /{' '}
+                        {activeSession?.targetQuestions ?? 12} {t.dashboard.questions}
                       </span>
 
                       <div className="max-w-[220px] flex-1">
                         <ProgressBar
-                          value={activeSession?.answeredQuestions ?? 4}
-                          max={activeSession?.targetQuestions ?? 10}
+                          value={activeSession?.answeredQuestions ?? 0}
+                          max={activeSession?.targetQuestions ?? 12}
                         />
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* =======================================
-                    CAT MASCOT SILHOUETTE IN PORTAL
-                ======================================== */}
+                {/* CAT MASCOT SILHOUETTE IN PORTAL */}
                 <div className="pointer-events-none absolute right-[13.2%] top-[48%] z-20 hidden -translate-y-1/2 items-center justify-center lg:flex">
                   <svg viewBox="0 0 160 190" className="h-[178px] w-[148px]" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -559,9 +549,7 @@ export default function DashboardPage() {
               </section>
             </div>
 
-            {/* ===========================================
-                LOWER SHELL (SUBJECTS + DAILY GOAL)
-            ============================================ */}
+            {/* LOWER SHELL (SUBJECTS + DAILY GOAL) */}
             <div className="grid min-h-0 grid-cols-[minmax(0,1.96fr)_minmax(340px,1fr)]">
               {/* LEFT WHITE SHELL (CHOOSE A SUBJECT) */}
               <div className="min-h-0 rounded-b-[30px] bg-white/95 pl-[8px] pr-[4px] pt-[4px] pb-[8px] shadow-[0_10px_24px_rgba(21,71,138,0.08)]">
@@ -575,12 +563,12 @@ export default function DashboardPage() {
                         className="h-[30px] w-[30px] object-contain"
                       />
                       <h2 className="whitespace-nowrap text-[20px] font-black tracking-[-0.02em] text-[#0c347a]">
-                        Choose a Subject
+                        {t.dashboard.chooseSubject}
                       </h2>
                     </div>
 
                     <p className="truncate text-[12px] font-bold text-[#677f9e]">
-                      Pick a subject and continue your learning adventure!
+                      {t.dashboard.pickSubjectSub}
                     </p>
                   </div>
 
@@ -588,16 +576,20 @@ export default function DashboardPage() {
                   <div className="grid min-h-0 grid-cols-2 gap-[12px]">
                     <SubjectCard
                       type="math"
-                      title="Mathematics"
-                      description="Build, solve, and grow your number skills!"
+                      title={t.dashboard.mathTitle}
+                      description={t.dashboard.mathDesc}
+                      doneLabel={t.dashboard.done}
+                      actionLabel={t.dashboard.continueBtn}
                       session={mathSession}
                       onStart={() => handleStartSubject('math')}
                     />
 
                     <SubjectCard
                       type="english"
-                      title="English"
-                      description="Read, write, and discover amazing stories!"
+                      title={t.dashboard.englishTitle}
+                      description={t.dashboard.englishDesc}
+                      doneLabel={t.dashboard.done}
+                      actionLabel={t.dashboard.exploreBtn}
                       session={englishSession}
                       onStart={() => handleStartSubject('english')}
                     />
@@ -607,7 +599,6 @@ export default function DashboardPage() {
 
               {/* RIGHT COLUMN (DAILY GOAL + WOODEN SIGN CUTOUT AREA) */}
               <div className="flex min-h-0 flex-col">
-                {/* DAILY GOAL SHELL */}
                 <div className="h-[58%] min-h-[188px] rounded-br-[30px] bg-white/95 pl-[4px] pr-[8px] pt-[4px] pb-[8px] shadow-[0_10px_24px_rgba(21,71,138,0.08)]">
                   <aside className="flex h-full flex-col justify-between rounded-[22px] border border-[#dfeaf5] bg-[#fcfdff] px-[18px] py-[12px]">
                     <div>
@@ -619,27 +610,26 @@ export default function DashboardPage() {
                             className="h-[30px] w-[30px] shrink-0 object-contain"
                           />
                           <h3 className="text-[19px] font-black tracking-[-0.02em] text-[#0c347a]">
-                            Daily Goal
+                            {t.dashboard.dailyGoal}
                           </h3>
                         </div>
 
                         <div className="rounded-full bg-[#e3f2ff] px-[11px] py-[4px] text-[11px] font-extrabold text-[#1e6fd9]">
-                          {dailyGoal} / 3 activities
+                          {dailyGoal} / 3 {t.dashboard.activities}
                         </div>
                       </div>
 
                       <p className="mt-[4px] text-[11.5px] font-bold text-[#6980a0]">
-                        Keep going! You&apos;re doing great!
+                        {t.dashboard.keepGoing}
                       </p>
                     </div>
 
-                    {/* GOAL STEPS & SEAMLESS CONNECTORS */}
                     <div className="my-auto flex items-start justify-between px-[4px] pt-[4px]">
-                      <GoalStep complete={dailyGoal >= 1} label="Learn something new" />
+                      <GoalStep complete={dailyGoal >= 1} label={t.dashboard.step1} />
                       <GoalConnector status={dailyGoal >= 2 ? 'full' : dailyGoal === 1 ? 'half' : 'empty'} />
-                      <GoalStep complete={dailyGoal >= 2} label="Complete an activity" />
+                      <GoalStep complete={dailyGoal >= 2} label={t.dashboard.step2} />
                       <GoalConnector status={dailyGoal >= 3 ? 'full' : dailyGoal === 2 ? 'half' : 'empty'} />
-                      <GoalStep complete={dailyGoal >= 3} label="Earn rewards" />
+                      <GoalStep complete={dailyGoal >= 3} label={t.dashboard.step3} />
                     </div>
                   </aside>
                 </div>
@@ -658,9 +648,7 @@ export default function DashboardPage() {
         </section>
       </div>
 
-      {/* =================================================
-          ERROR TOAST
-      ================================================== */}
+      {/* ERROR TOAST */}
       {error && (
         <div className="fixed bottom-4 right-4 z-[100] rounded-[14px] bg-[#fff1f1] px-4 py-3 text-xs font-bold text-[#bd4d4d] shadow-xl">
           {error}
@@ -709,10 +697,26 @@ function SidebarItem({
 // =========================================================
 // SUBJECT CARD
 // =========================================================
-function SubjectCard({ type, title, description, session, onStart }: { type: 'math' | 'english'; title: string; description: string; session: LessonProgressItem | null, onStart: () => void }) {
+function SubjectCard({
+  type,
+  title,
+  description,
+  doneLabel,
+  actionLabel,
+  session,
+  onStart,
+}: {
+  type: 'math' | 'english';
+  title: string;
+  description: string;
+  doneLabel: string;
+  actionLabel: string;
+  session: LessonProgressItem | null;
+  onStart: () => void;
+}) {
   const isMath = type === 'math';
-  const progressValue = session?.answeredQuestions ?? (isMath ? 4 : 2);
-  const progressMax = session?.targetQuestions ?? (isMath ? 10 : 8);
+  const progressValue = session?.answeredQuestions ?? 0;
+  const progressMax = session?.targetQuestions ?? 12;
   const imageSrc = isMath ? '/assets/dashboard/math.png' : '/assets/dashboard/eng.png';
 
   return (
@@ -736,7 +740,7 @@ function SubjectCard({ type, title, description, session, onStart }: { type: 'ma
               <span className={`whitespace-nowrap text-[11.5px] font-black ${isMath ? 'text-[#228b53]' : 'text-[#d98600]'}`}>
                 {progressValue} / {progressMax}
               </span>
-              <span className="text-[10.5px] font-bold text-[#697f9c]">done</span>
+              <span className="text-[10.5px] font-bold text-[#697f9c]">{doneLabel}</span>
             </div>
             <div className="mt-[4px]">
               <ProgressBar value={progressValue} max={progressMax} green={isMath} orange={!isMath} />
@@ -747,7 +751,7 @@ function SubjectCard({ type, title, description, session, onStart }: { type: 'ma
             onClick={onStart}
             className={`flex h-[33px] items-center justify-center gap-[6px] rounded-[11px] text-[12.5px] font-extrabold text-white shadow-[0_5px_12px_rgba(38,84,125,0.14)] transition hover:brightness-105 ${isMath ? 'bg-[linear-gradient(180deg,#4cc97f_0%,#2fa862_100%)]' : 'bg-[linear-gradient(180deg,#ffbe2e_0%,#f29f05_100%)]'}`}
           >
-            <span>{isMath ? 'Continue' : 'Explore'}</span>
+            <span>{actionLabel}</span>
             <span className="text-[14px] leading-none">→</span>
           </button>
         </div>

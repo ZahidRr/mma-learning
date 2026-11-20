@@ -7,9 +7,8 @@ import useSound from 'use-sound';
 import Header from '../components/Header';
 import {
   type AppLocale,
-  getStoredLocale,
-  setStoredLocale,
   UI_TEXT,
+  useAppLocale,
 } from '../lib/i18n';
 
 const defaultUserProfile = {
@@ -34,7 +33,7 @@ export default function ProfilePage() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [locale, setLocale] = useState<AppLocale>(() => getStoredLocale());
+  const [locale, setLocale] = useAppLocale();
   const [languageNotice, setLanguageNotice] = useState<string | null>(null);
   const [userId] = useState<string | null>(() =>
     typeof window !== 'undefined' ? window.localStorage.getItem('userId') : null,
@@ -69,7 +68,6 @@ export default function ProfilePage() {
             lp.preferredLanguage === 'zh'
           ) {
             setLocale(lp.preferredLanguage);
-            setStoredLocale(lp.preferredLanguage);
           }
         }
       })
@@ -78,12 +76,12 @@ export default function ProfilePage() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API_BASE_URL]);
 
   async function handleLanguageChange(nextLocale: AppLocale) {
     playClick();
     setLocale(nextLocale);
-    setStoredLocale(nextLocale);
     setLanguageNotice(UI_TEXT[nextLocale].profile.languageSaved);
     setTimeout(() => setLanguageNotice(null), 2500);
 
@@ -272,13 +270,13 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-[10px]">
                         <h2 className="text-[22px] font-black text-[#0c347a]">{profile.name}</h2>
                         <span className="rounded-full bg-[#e6f7ee] px-[10px] py-[2px] text-[11px] font-extrabold text-[#1f9d63]">
-                          Grade {profile.gradeLevel}
+                          {t.header.primary} {profile.gradeLevel}
                         </span>
                       </div>
                       <p className="mt-[2px] text-[12px] font-bold text-[#879ab3]">ID: {profile.studentId}</p>
                       <div className="mt-[8px] flex items-center gap-[14px] text-[12px] font-extrabold text-[#143975]">
                         <span>⭐ {profile.totalXp} XP</span>
-                        <span>🔥 {profile.streak}d Streak</span>
+                        <span>🔥 {profile.streak} {t.header.dayStreak}</span>
                       </div>
                     </div>
                   </div>

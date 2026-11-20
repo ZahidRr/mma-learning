@@ -1,24 +1,83 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import useSound from 'use-sound';
-import Header from '../components/Header'; // <-- Import komponen Header
+import Header from '../components/Header';
+import { UI_TEXT, useAppLocale } from '../lib/i18n';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // =========================================================
 // TYPES
 // =========================================================
-type ProgressResponse = {
-  profile: any;
-  summary: any;
-  masteries: any[];
-  lessonProgress: any[];
-  dashboardAnalytics: {
-    weeklyActivity: any[];
-    subjectPerformance: any;
-    achievements: any[];
+type MeResponse = {
+  id: string;
+  email: string;
+  role: string;
+  learnerProfile: {
+    id: string;
+    displayName: string;
+    gradeLevel: number;
+    avatarKey: string | null;
+  } | null;
+};
+
+type MasteryItem = {
+  skillId: string;
+  skillName: string;
+  masteryScore: number;
+  totalAttempts: number;
+  correctAttempts: number;
+  subject: {
+    id: string;
+    name: string;
+    slug: string;
   };
+};
+
+type LessonProgressItem = {
+  sessionId: string;
+  lesson: {
+    id: string;
+    title: string;
+    slug: string;
+    xpReward: number;
+  };
+  skill: {
+    id: string;
+    name: string;
+  };
+  subject: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED';
+  targetQuestions: number;
+  answeredQuestions: number;
+  correctAnswers: number;
+  earnedXp: number;
+  startedAt: string;
+  completedAt: string | null;
+};
+
+type ProgressResponse = {
+  profile: {
+    displayName: string;
+    gradeLevel: number;
+    totalXp: number;
+  };
+  summary: {
+    totalXp: number;
+    totalAttempts: number;
+    totalCorrectAttempts: number;
+    completedLessons: number;
+    masteredSkills: number;
+  };
+  masteries: MasteryItem[];
+  lessonProgress: LessonProgressItem[];
 };
 
 // =========================================================
@@ -27,19 +86,18 @@ type ProgressResponse = {
 export default function ProgressPage() {
   const router = useRouter();
   const pathname = usePathname();
-  
+  const [locale] = useAppLocale();
+  const t = UI_TEXT[locale];
+
   const [playClick] = useSound('/assets/sounds/click.mp3', { volume: 0.5 });
 
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<MeResponse | null>(null);
   const [progress, setProgress] = useState<ProgressResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // =======================================================
-  // FETCH DATA
-  // =======================================================
   useEffect(() => {
     async function loadProgress() {
-      const token = localStorage.getItem('accessToken');
+      const token = window.localStorage.getItem('accessToken');
       if (!token) {
         router.replace('/login');
         return;
@@ -48,25 +106,26 @@ export default function ProgressPage() {
       try {
         setLoading(true);
 
-        const meResponse = await fetch('http://localhost:3001/auth/me', {
+        const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!meResponse.ok) {
-          localStorage.removeItem('accessToken');
+          window.localStorage.removeItem('accessToken');
+          window.localStorage.removeItem('userId');
           router.replace('/login');
           return;
         }
 
-        const meData = await meResponse.json();
+        const meData: MeResponse = await meResponse.json();
         setUser(meData);
 
         const progressResponse = await fetch(
-          `http://localhost:3001/progress/users/${meData.id}`
+          `${API_BASE_URL}/progress/users/${meData.id}`,
         );
 
         if (progressResponse.ok) {
-          const progressData = await progressResponse.json();
+          const progressData: ProgressResponse = await progressResponse.json();
           setProgress(progressData);
         }
       } catch (err) {
@@ -79,57 +138,135 @@ export default function ProgressPage() {
     void loadProgress();
   }, [router]);
 
-  // =======================================================
-  // DERIVED DATA
-  // =======================================================
-  const displayName = progress?.profile?.displayName ?? user?.learnerProfile?.displayName ?? 'Explorer';
-  const gradeLevel = progress?.profile?.gradeLevel ?? user?.learnerProfile?.gradeLevel ?? 1;
+  const displayName =
+    progress?.profile?.displayName ?? user?.learnerProfile?.displayName ?? 'Explorer';
+  const gradeLevel =
+    progress?.profile?.gradeLevel ?? user?.learnerProfile?.gradeLevel ?? 1;
 
-  const totalXp = 0;
+  const totalXp = progress?.summary?.totalXp ?? progress?.profile?.totalXp ?? 0;
   const streakDays = 7;
 
-  // Mock Achievements (Word Wizard menggunakan ukuran standar, 3 lainnya diperbesar)
+  const mathSession = useMemo(() => {
+    const list = (progress?.lessonProgress ?? []).filter(
+      (s) => s.subject.slug === 'mathematics',
+    );
+    return list.find((s) => s.status === 'IN_PROGRESS') ?? list[0] ?? null;
+  }, [progress]);
+
+  const englishSession = useMemo(() => {
+    const list = (progress?.lessonProgress ?? []).filter(
+      (s) => s.subject.slug === 'english',
+    );
+    return list.find((s) => s.status === 'IN_PROGRESS') ?? list[0] ?? null;
+  }, [progress]);
+
+  const mathAnswered = mathSession?.answeredQuestions ?? 0;
+  const mathTarget = mathSession?.targetQuestions ?? 12;
+  const englishAnswered = englishSession?.answeredQuestions ?? 0;
+  const englishTarget = englishSession?.targetQuestions ?? 12;
+
+  const masteryCounts = useMemo(() => {
+    const masteries = progress?.masteries ?? [];
+    let mastered = 0;
+    let learning = 0;
+    let needsPractice = 0;
+
+    for (const m of masteries) {
+      if (m.masteryScore >= 0.8) mastered++;
+      else if (m.masteryScore >= 0.4) learning++;
+      else if (m.totalAttempts > 0) needsPractice++;
+    }
+
+    const totalGradeSkills = 18;
+    const notStarted = Math.max(
+      totalGradeSkills - (mastered + learning + needsPractice),
+      0,
+    );
+
+    return { mastered, learning, needsPractice, notStarted };
+  }, [progress]);
+
+  const mathMasteredCount = useMemo(() => {
+    return (progress?.masteries ?? []).filter(
+      (m) => m.subject.slug === 'mathematics' && m.masteryScore >= 0.8,
+    ).length;
+  }, [progress]);
+
+  const completedLessonsCount = progress?.summary?.completedLessons ?? 0;
+  const totalCorrectCount = progress?.summary?.totalCorrectAttempts ?? 0;
+
   const achievements = [
-    { id: 1, name: 'Math Explorer', desc: 'Master 5 math skills', icon: '/assets/badges/math-badge.png', progress: 0, target: 5, unlocked: false, imgSize: 'h-[80px] w-[80px]' },
-    { id: 2, name: 'Bookworm', desc: 'Complete 10 lessons', icon: '/assets/badges/bookworm-badge.png', progress: 0, target: 10, unlocked: false, imgSize: 'h-[80px] w-[80px]' },
-    { id: 3, name: 'Streak Master', desc: 'Maintain a 7-day streak', icon: '/assets/badges/alwayscheckin-badge.png', progress: 7, target: 7, unlocked: true, imgSize: 'h-[80px] w-[80px]' },
-    { id: 4, name: 'Word Wizard', desc: 'Learn 50 new words', icon: '/assets/badges/knowledge-champion.png', progress: 30, target: 50, unlocked: false, imgSize: 'h-[62px] w-[62px]' },
+    {
+      id: 1,
+      name: t.progress.achMathName,
+      desc: t.progress.achMathDesc,
+      icon: '/assets/badges/math-badge.png',
+      progress: Math.min(mathMasteredCount, 5),
+      target: 5,
+      unlocked: mathMasteredCount >= 5,
+      imgSize: 'h-[80px] w-[80px]',
+    },
+    {
+      id: 2,
+      name: t.progress.achBookName,
+      desc: t.progress.achBookDesc,
+      icon: '/assets/badges/bookworm-badge.png',
+      progress: Math.min(completedLessonsCount, 10),
+      target: 10,
+      unlocked: completedLessonsCount >= 10,
+      imgSize: 'h-[80px] w-[80px]',
+    },
+    {
+      id: 3,
+      name: t.progress.achStreakName,
+      desc: t.progress.achStreakDesc,
+      icon: '/assets/badges/alwayscheckin-badge.png',
+      progress: Math.min(streakDays, 7),
+      target: 7,
+      unlocked: streakDays >= 7,
+      imgSize: 'h-[80px] w-[80px]',
+    },
+    {
+      id: 4,
+      name: t.progress.achWordName,
+      desc: t.progress.achWordDesc,
+      icon: '/assets/badges/knowledge-champion.png',
+      progress: Math.min(totalCorrectCount, 50),
+      target: 50,
+      unlocked: totalCorrectCount >= 50,
+      imgSize: 'h-[62px] w-[62px]',
+    },
   ];
 
-  // =======================================================
-  // LOADING SCREEN
-  // =======================================================
+  const recentLessons = useMemo(() => {
+    return (progress?.lessonProgress ?? []).slice(0, 4);
+  }, [progress]);
+
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#dff4ff]">
         <div className="text-center">
           <div className="mx-auto h-11 w-11 animate-spin rounded-full border-4 border-white border-t-[#2788ed]" />
-          <p className="mt-4 text-sm font-bold text-[#5879a3]">Loading your progress...</p>
+          <p className="mt-4 text-sm font-bold text-[#5879a3]">{t.progress.loading}</p>
         </div>
       </main>
     );
   }
 
-  // =======================================================
-  // UI RENDER
-  // =======================================================
   return (
     <main
       className="relative h-[100dvh] w-full overflow-hidden bg-[#72c9fa] bg-[length:100%_100%] bg-center bg-no-repeat select-none"
       style={{ backgroundImage: "url('/assets/dashboard/dashboard-bg.png')" }}
     >
-      <Header 
-        totalXp={totalXp} 
-        streakDays={streakDays} 
-        displayName={displayName} 
-        gradeLevel={gradeLevel} 
+      <Header
+        totalXp={totalXp}
+        streakDays={streakDays}
+        displayName={displayName}
+        gradeLevel={gradeLevel}
       />
 
       <div className="relative z-10 flex h-[calc(100dvh-72px)] min-h-0 gap-[14px] pl-0 pr-[22px] pt-[12px] pb-[22px]">
-        
-        {/* ===============================================
-            SIDEBAR
-        ================================================ */}
+        {/* SIDEBAR */}
         <aside className="relative -mt-[4px] hidden h-full w-[198px] shrink-0 overflow-visible lg:block">
           <svg
             viewBox="0 0 110 85"
@@ -192,39 +329,34 @@ export default function ProgressPage() {
           </svg>
 
           <nav className="relative z-30 flex flex-col gap-[3px] px-[12px] pt-[24px]">
-            <SidebarItem icon="/assets/sidebar/home.png" label="Home" href="/dashboard" active={pathname === '/dashboard'} playClick={playClick} />
-            <SidebarItem icon="/assets/sidebar/learn.png" label="Learn" href="/learn" active={pathname?.startsWith('/learn')} playClick={playClick} />
-            <SidebarItem icon="/assets/sidebar/journey.png" label="Journey" href="/journey" active={pathname?.startsWith('/journey')} playClick={playClick} />
-            <SidebarItem icon="/assets/sidebar/progress.png" label="Progress" href="/progress" active={pathname?.startsWith('/progress')} playClick={playClick} />
-            <SidebarItem icon="/assets/sidebar/rewards.png" label="Rewards" href="/rewards" active={pathname?.startsWith('/rewards')} playClick={playClick} />
-            <SidebarItem icon="/assets/sidebar/profile.png" label="Profile" href="/profile" active={pathname?.startsWith('/profile')} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/home.png" label={t.nav.home} href="/dashboard" active={pathname === '/dashboard'} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/learn.png" label={t.nav.learn} href="/learn" active={pathname?.startsWith('/learn')} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/journey.png" label={t.nav.journey} href="/journey" active={pathname?.startsWith('/journey')} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/progress.png" label={t.nav.progress} href="/progress" active={pathname?.startsWith('/progress')} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/rewards.png" label={t.nav.rewards} href="/rewards" active={pathname?.startsWith('/rewards')} playClick={playClick} />
+            <SidebarItem icon="/assets/sidebar/profile.png" label={t.nav.profile} href="/profile" active={pathname?.startsWith('/profile')} playClick={playClick} />
           </nav>
         </aside>
 
-        {/* ===============================================
-            MAIN CONTENT AREA
-        ================================================ */}
+        {/* MAIN CONTENT AREA */}
         <section className="min-w-0 flex-1 flex flex-col pl-[6px] gap-[14px]">
-
           {/* TITLE BUBBLE */}
           <div className="shrink-0 inline-flex flex-col justify-center rounded-[24px] bg-white/90 backdrop-blur-md px-[24px] py-[12px] shadow-sm w-fit border border-white">
             <div className="flex items-center gap-[10px]">
               <span className="text-[22px]">📊</span>
               <h1 className="text-[24px] font-black leading-none text-[#0c347a] flex items-center gap-2">
-                My Progress <span className="text-[18px] text-[#ffca3a]">✨</span>
+                {t.progress.title} <span className="text-[18px] text-[#ffca3a]">✨</span>
               </h1>
             </div>
             <p className="mt-[4px] pl-[32px] text-[12px] font-bold text-[#144799]">
-              Keep learning and grow every day!
+              {t.progress.subtitle}
             </p>
           </div>
 
           {/* CONTAINER UTAMA */}
           <div className="flex-1 min-h-0 flex flex-col gap-[14px] overflow-hidden">
-
             {/* ROW 1: MATH, ENGLISH, SKILL MASTERY */}
             <div className="shrink-0 grid grid-cols-[1fr_1fr_1.5fr] gap-[14px] h-[36%] min-h-[140px]">
-              
               {/* Mathematics Card */}
               <div className="flex flex-col justify-between rounded-[24px] bg-white p-[20px] shadow-sm border border-[#eef3f9]">
                 <div className="flex items-start justify-between">
@@ -233,22 +365,33 @@ export default function ProgressPage() {
                       <CalculatorIcon className="h-[28px] w-[28px]" />
                     </div>
                     <div>
-                      <h3 className="text-[18px] font-black leading-tight text-[#0c347a]">Mathematics</h3>
-                      <p className="mt-[2px] text-[11px] font-bold text-[#6782a2]">Build, solve, and grow your number skills!</p>
+                      <h3 className="text-[18px] font-black leading-tight text-[#0c347a]">{t.progress.mathTitle}</h3>
+                      <p className="mt-[2px] text-[11px] font-bold text-[#6782a2]">{t.progress.mathDesc}</p>
                     </div>
                   </div>
                   <div className="flex h-[48px] min-w-[62px] shrink-0 flex-col items-center justify-center rounded-[12px] bg-[#e1f8eb] px-[8px] text-center">
-                    <p className="text-[14px] font-black leading-none text-[#238a53]">4 / 10</p>
-                    <p className="mt-[3px] text-[9.5px] font-bold text-[#5c7a97]">done</p>
+                    <p className="text-[14px] font-black leading-none text-[#238a53]">
+                      {mathAnswered} / {mathTarget}
+                    </p>
+                    <p className="mt-[3px] text-[9.5px] font-bold text-[#5c7a97]">{t.progress.done}</p>
                   </div>
                 </div>
-                
+
                 <div className="mt-[8px]">
                   <div className="mb-[8px] h-[6px] w-full overflow-hidden rounded-full bg-[#dff3e6]">
-                    <div className="h-full rounded-full bg-[#3ec073]" style={{ width: '40%' }} />
+                    <div
+                      className="h-full rounded-full bg-[#3ec073]"
+                      style={{ width: `${Math.min((mathAnswered / Math.max(mathTarget, 1)) * 100, 100)}%` }}
+                    />
                   </div>
-                  <button onClick={() => playClick()} className="flex h-[40px] w-full items-center justify-center rounded-[14px] bg-[linear-gradient(180deg,#25cf7a_0%,#16b86b_100%)] text-[14px] font-extrabold text-white shadow-[0_4px_10px_rgba(28,184,107,0.22)] transition hover:brightness-105">
-                    Continue Learning →
+                  <button
+                    onClick={() => {
+                      playClick();
+                      router.push('/journey?subject=math');
+                    }}
+                    className="flex h-[40px] w-full items-center justify-center rounded-[14px] bg-[linear-gradient(180deg,#25cf7a_0%,#16b86b_100%)] text-[14px] font-extrabold text-white shadow-[0_4px_10px_rgba(28,184,107,0.22)] transition hover:brightness-105"
+                  >
+                    {t.progress.continueLearning}
                   </button>
                 </div>
               </div>
@@ -261,22 +404,33 @@ export default function ProgressPage() {
                       <BookIcon className="h-[28px] w-[28px]" />
                     </div>
                     <div>
-                      <h3 className="text-[18px] font-black leading-tight text-[#0c347a]">English</h3>
-                      <p className="mt-[2px] text-[11px] font-bold text-[#6782a2]">Read, write, and discover amazing stories!</p>
+                      <h3 className="text-[18px] font-black leading-tight text-[#0c347a]">{t.progress.englishTitle}</h3>
+                      <p className="mt-[2px] text-[11px] font-bold text-[#6782a2]">{t.progress.englishDesc}</p>
                     </div>
                   </div>
                   <div className="flex h-[48px] min-w-[62px] shrink-0 flex-col items-center justify-center rounded-[12px] bg-[#fff2d5] px-[8px] text-center">
-                    <p className="text-[14px] font-black leading-none text-[#d98500]">2 / 8</p>
-                    <p className="mt-[3px] text-[9.5px] font-bold text-[#5c7a97]">done</p>
+                    <p className="text-[14px] font-black leading-none text-[#d98500]">
+                      {englishAnswered} / {englishTarget}
+                    </p>
+                    <p className="mt-[3px] text-[9.5px] font-bold text-[#5c7a97]">{t.progress.done}</p>
                   </div>
                 </div>
-                
+
                 <div className="mt-[8px]">
                   <div className="mb-[8px] h-[6px] w-full overflow-hidden rounded-full bg-[#fae8c6]">
-                    <div className="h-full rounded-full bg-[#f4a61d]" style={{ width: '25%' }} />
+                    <div
+                      className="h-full rounded-full bg-[#f4a61d]"
+                      style={{ width: `${Math.min((englishAnswered / Math.max(englishTarget, 1)) * 100, 100)}%` }}
+                    />
                   </div>
-                  <button onClick={() => playClick()} className="flex h-[40px] w-full items-center justify-center rounded-[14px] bg-[linear-gradient(180deg,#ffc233_0%,#f2a20a_100%)] text-[14px] font-extrabold text-white shadow-[0_4px_10px_rgba(242,162,10,0.22)] transition hover:brightness-105">
-                    Explore Lessons →
+                  <button
+                    onClick={() => {
+                      playClick();
+                      router.push('/journey?subject=english');
+                    }}
+                    className="flex h-[40px] w-full items-center justify-center rounded-[14px] bg-[linear-gradient(180deg,#ffc233_0%,#f2a20a_100%)] text-[14px] font-extrabold text-white shadow-[0_4px_10px_rgba(242,162,10,0.22)] transition hover:brightness-105"
+                  >
+                    {t.progress.exploreLessons}
                   </button>
                 </div>
               </div>
@@ -286,56 +440,69 @@ export default function ProgressPage() {
                 <div className="flex items-center justify-between mb-[12px]">
                   <div className="flex items-center gap-[8px]">
                     <span className="text-[20px]">🏆</span>
-                    <h2 className="text-[16px] font-black text-[#0c347a]">Skill Mastery</h2>
+                    <h2 className="text-[16px] font-black text-[#0c347a]">{t.progress.skillMastery}</h2>
                   </div>
-                  <button 
-                    onClick={() => playClick()} 
+                  <button
+                    onClick={() => {
+                      playClick();
+                      router.push('/journey?subject=math');
+                    }}
                     className="inline-flex items-center gap-1 rounded-full bg-[#f0f6fc] px-[10px] py-[4px] text-[11px] font-black text-[#2a80f0] transition hover:bg-[#e4f1ff]"
                   >
-                    View Details →
+                    {t.progress.viewDetails}
                   </button>
                 </div>
-                
+
                 <div className="flex items-center justify-between px-[10px] mb-[12px]">
-                  <div className="flex items-center gap-[6px]"><span className="h-[10px] w-[10px] rounded-full bg-[#3ec073]"></span><span className="text-[10.5px] font-bold text-[#627b9c]">Mastered</span></div>
-                  <div className="flex items-center gap-[6px]"><span className="h-[10px] w-[10px] rounded-full bg-[#ffca3a]"></span><span className="text-[10.5px] font-bold text-[#627b9c]">Learning</span></div>
-                  <div className="flex items-center gap-[6px]"><span className="h-[10px] w-[10px] rounded-full bg-[#f4a61d]"></span><span className="text-[10.5px] font-bold text-[#627b9c]">Needs Practice</span></div>
-                  <div className="flex items-center gap-[6px]"><span className="h-[10px] w-[10px] rounded-full bg-[#e2eaf4]"></span><span className="text-[10.5px] font-bold text-[#627b9c]">Not Started</span></div>
+                  <div className="flex items-center gap-[6px]">
+                    <span className="h-[10px] w-[10px] rounded-full bg-[#3ec073]" />
+                    <span className="text-[10.5px] font-bold text-[#627b9c]">{t.progress.mastered}</span>
+                  </div>
+                  <div className="flex items-center gap-[6px]">
+                    <span className="h-[10px] w-[10px] rounded-full bg-[#ffca3a]" />
+                    <span className="text-[10.5px] font-bold text-[#627b9c]">{t.progress.learning}</span>
+                  </div>
+                  <div className="flex items-center gap-[6px]">
+                    <span className="h-[10px] w-[10px] rounded-full bg-[#f4a61d]" />
+                    <span className="text-[10.5px] font-bold text-[#627b9c]">{t.progress.needsPractice}</span>
+                  </div>
+                  <div className="flex items-center gap-[6px]">
+                    <span className="h-[10px] w-[10px] rounded-full bg-[#e2eaf4]" />
+                    <span className="text-[10.5px] font-bold text-[#627b9c]">{t.progress.notStarted}</span>
+                  </div>
                 </div>
-                
+
                 <div className="grid grid-cols-4 divide-x divide-[#f0f4f8] mt-auto">
                   <div className="flex flex-col items-center">
-                    <p className="text-[32px] font-black leading-none text-[#0c347a]">0</p>
-                    <p className="text-[11px] font-bold text-[#879ab3] mt-[2px]">min</p>
+                    <p className="text-[32px] font-black leading-none text-[#0c347a]">{masteryCounts.mastered}</p>
+                    <p className="text-[11px] font-bold text-[#879ab3] mt-[2px]">{t.progress.skillsUnit}</p>
                   </div>
                   <div className="flex flex-col items-center">
-                    <p className="text-[32px] font-black leading-none text-[#0c347a]">0</p>
-                    <p className="text-[11px] font-bold text-[#879ab3] mt-[2px]">min</p>
+                    <p className="text-[32px] font-black leading-none text-[#0c347a]">{masteryCounts.learning}</p>
+                    <p className="text-[11px] font-bold text-[#879ab3] mt-[2px]">{t.progress.skillsUnit}</p>
                   </div>
                   <div className="flex flex-col items-center">
-                    <p className="text-[32px] font-black leading-none text-[#0c347a]">0</p>
-                    <p className="text-[11px] font-bold text-[#879ab3] mt-[2px]">min</p>
+                    <p className="text-[32px] font-black leading-none text-[#0c347a]">{masteryCounts.needsPractice}</p>
+                    <p className="text-[11px] font-bold text-[#879ab3] mt-[2px]">{t.progress.skillsUnit}</p>
                   </div>
                   <div className="flex flex-col items-center">
-                    <p className="text-[32px] font-black leading-none text-[#0c347a]">0</p>
-                    <p className="text-[11px] font-bold text-[#879ab3] mt-[2px]">min</p>
+                    <p className="text-[32px] font-black leading-none text-[#0c347a]">{masteryCounts.notStarted}</p>
+                    <p className="text-[11px] font-bold text-[#879ab3] mt-[2px]">{t.progress.skillsUnit}</p>
                   </div>
                 </div>
               </div>
-
             </div>
 
             {/* ROW 2: CALENDAR, ACHIEVEMENTS, RECENT ACTIVITY */}
             <div className="flex-1 min-h-0 grid grid-cols-[1fr_1.5fr_1.2fr] gap-[14px]">
-              
               {/* Learning Calendar */}
               <div className="rounded-[24px] bg-white p-[20px] shadow-sm flex flex-col justify-between border border-[#eef3f9]">
                 <div>
                   <div className="flex items-center gap-[8px] mb-[16px]">
                     <span className="text-[20px] text-[#2b9aff]">📅</span>
-                    <h2 className="text-[16px] font-black tracking-tight text-[#0c347a]">Learning Calendar</h2>
+                    <h2 className="text-[16px] font-black tracking-tight text-[#0c347a]">{t.progress.learningCalendar}</h2>
                   </div>
-                  
+
                   <div className="mb-[12px] flex items-center justify-between px-[10px]">
                     <button onClick={() => playClick()} className="text-[#0c347a] hover:text-[#2b9aff] font-black text-[14px]">❮</button>
                     <span className="text-[14px] font-black text-[#0c347a]">May 2025</span>
@@ -343,15 +510,17 @@ export default function ProgressPage() {
                   </div>
 
                   <div className="grid grid-cols-7 gap-y-[10px] text-center text-[12px] font-bold text-[#879ab3]">
-                    <div className="text-[10px] mb-[2px]">Mon</div><div className="text-[10px] mb-[2px]">Tue</div><div className="text-[10px] mb-[2px]">Wed</div><div className="text-[10px] mb-[2px]">Thu</div><div className="text-[10px] mb-[2px]">Fri</div><div className="text-[10px] mb-[2px]">Sat</div><div className="text-[10px] mb-[2px]">Sun</div>
-                    
+                    {t.progress.daysShort.map((d) => (
+                      <div key={d} className="text-[10px] mb-[2px]">{d}</div>
+                    ))}
+
                     <div className="text-[#dce7f2]">28</div><div className="text-[#dce7f2]">29</div><div className="text-[#dce7f2]">30</div>
                     <div className="text-[#143975]">1</div><div className="text-[#143975]">2</div>
                     <div className="relative mx-auto flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#3ec073] text-white shadow-sm">
                       3
                     </div>
                     <div className="text-[#143975]">4</div>
-                    
+
                     <div className="text-[#143975]">5</div><div className="text-[#143975]">6</div><div className="text-[#143975]">7</div>
                     <div className="relative mx-auto flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#3ec073] text-white shadow-sm">
                       8
@@ -378,32 +547,34 @@ export default function ProgressPage() {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between px-[10px] text-[10px] font-bold text-[#879ab3]">
-                  <div className="flex items-center gap-[4px]"><span className="h-[10px] w-[10px] rounded-full bg-[#3ec073]"></span> Learned</div>
-                  <div className="flex items-center gap-[4px]"><span className="text-[12px]">⭐</span> Earned XP</div>
-                  <div className="flex items-center gap-[4px]"><span className="h-[10px] w-[10px] rounded-full bg-[#e2eaf4]"></span> No Activity</div>
+                  <div className="flex items-center gap-[4px]"><span className="h-[10px] w-[10px] rounded-full bg-[#3ec073]" /> {t.progress.learned}</div>
+                  <div className="flex items-center gap-[4px]"><span className="text-[12px]">⭐</span> {t.progress.earnedXp}</div>
+                  <div className="flex items-center gap-[4px]"><span className="h-[10px] w-[10px] rounded-full bg-[#e2eaf4]" /> {t.progress.noActivity}</div>
                 </div>
               </div>
 
-              {/* Achievements & Milestones (Kotak abu-abu tetap, isi badge diperbesar kecuali Word Wizard) */}
+              {/* Achievements & Milestones */}
               <div className="rounded-[24px] bg-white p-[20px] shadow-sm flex flex-col justify-between border border-[#eef3f9]">
                 <div className="mb-[16px] flex items-center justify-between">
                   <div className="flex items-center gap-[8px]">
                     <span className="text-[20px]">🏆</span>
-                    <h2 className="text-[16px] font-black text-[#0c347a]">Achievements & Milestones</h2>
+                    <h2 className="text-[16px] font-black text-[#0c347a]">{t.progress.achievementsTitle}</h2>
                   </div>
-                  <button 
-                    onClick={() => playClick()} 
+                  <button
+                    onClick={() => {
+                      playClick();
+                      router.push('/rewards');
+                    }}
                     className="inline-flex items-center gap-1 rounded-full bg-[#f0f6fc] px-[10px] py-[4px] text-[11px] font-black text-[#2a80f0] transition hover:bg-[#e4f1ff]"
                   >
-                    View All →
+                    {t.progress.viewAll}
                   </button>
                 </div>
-                
+
                 <div className="grid grid-cols-4 gap-[8px] h-full">
                   {achievements.map((ach) => (
                     <div key={ach.id} className="flex flex-col items-center justify-between rounded-[20px] border border-[#f0f4f8] p-[12px] pb-[16px]">
                       <div className="flex flex-col items-center w-full">
-                        {/* Kotak abu-abu (base) tetap berukuran h-[74px] w-[74px], gambar di dalam menyesuaikan ukurannya */}
                         <div className="mb-[8px] flex h-[74px] w-[74px] items-center justify-center rounded-[18px] bg-[#f4f7fb] p-[2px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.03)]">
                           <img src={ach.icon} alt={ach.name} className={`${ach.imgSize} object-contain drop-shadow-sm`} />
                         </div>
@@ -425,51 +596,89 @@ export default function ProgressPage() {
                 </div>
               </div>
 
-              {/* Recent Learning Activity - EMPTY STATE */}
+              {/* Recent Learning Activity */}
               <div className="rounded-[24px] bg-white p-[20px] shadow-sm flex flex-col border border-[#eef3f9]">
                 <div className="flex items-center justify-between shrink-0 mb-[12px]">
                   <div className="flex items-center gap-[8px]">
                     <span className="text-[20px] text-[#2b9aff]">🕒</span>
-                    <h2 className="text-[16px] font-black tracking-tight text-[#0c347a]">Recent Learning Activity</h2>
+                    <h2 className="text-[16px] font-black tracking-tight text-[#0c347a]">{t.progress.recentActivity}</h2>
                   </div>
-                  <button 
-                    onClick={() => playClick()} 
+                  <button
+                    onClick={() => {
+                      playClick();
+                      router.push('/journey?subject=math');
+                    }}
                     className="inline-flex items-center gap-1 rounded-full bg-[#f0f6fc] px-[10px] py-[4px] text-[11px] font-black text-[#2a80f0] transition hover:bg-[#e4f1ff]"
                   >
-                    View All →
+                    {t.progress.viewAll}
                   </button>
                 </div>
-                
-                <div className="flex-1 flex flex-col items-center justify-center pt-[10px]">
-                  {/* Custom Clipboard SVG Icon */}
-                  <div className="relative flex justify-center items-center mb-[16px]">
-                    <svg width="100" height="85" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M40 85 C20 85, 10 75, 10 65 C10 50, 30 50, 30 40 C30 30, 15 20, 35 15 C55 10, 60 25, 75 20 C90 15, 100 30, 95 45 C90 60, 110 70, 90 80 C70 90, 60 85, 40 85 Z" fill="#f4f7fb" />
-                      <rect x="40" y="20" width="40" height="56" rx="8" fill="#2b9aff" />
-                      <rect x="46" y="26" width="28" height="44" rx="4" fill="#ffffff" />
-                      <rect x="48" y="14" width="24" height="12" rx="4" fill="#69a9ff" />
-                      <path d="M52 48 L58 54 L68 38" stroke="#3ec073" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx="20" cy="30" r="3" fill="#ffca3a" />
-                      <circle cx="95" cy="25" r="4" fill="#a3d4ff" />
-                      <circle cx="100" cy="65" r="3" fill="#a3d4ff" />
-                      <circle cx="25" cy="70" r="4" fill="#ffca3a" />
-                    </svg>
+
+                {recentLessons.length > 0 ? (
+                  <div className="flex-1 flex flex-col justify-center gap-[8px] overflow-y-auto">
+                    {recentLessons.map((item) => {
+                      const isMath = item.subject.slug === 'mathematics';
+                      const isDone = item.status === 'COMPLETED';
+                      return (
+                        <div
+                          key={item.sessionId}
+                          className="flex items-center justify-between rounded-[14px] border border-[#eef3f9] bg-[#f9fbff] px-[12px] py-[9px]"
+                        >
+                          <div className="min-w-0 pr-[8px]">
+                            <p className="truncate text-[12.5px] font-black text-[#0c347a]">
+                              {item.skill?.name || item.lesson.title}
+                            </p>
+                            <p className="text-[10.5px] font-bold text-[#7c92b0]">
+                              {isMath ? t.progress.mathTitle : t.progress.englishTitle} • {item.answeredQuestions}/{item.targetQuestions}
+                            </p>
+                          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-[9px] py-[3px] text-[10px] font-black ${
+                              isDone
+                                ? 'bg-[#e7f8ed] text-[#238a53]'
+                                : 'bg-[#e4f1ff] text-[#1e6fd9]'
+                            }`}
+                          >
+                            {isDone ? t.progress.completedStatus : t.progress.inProgressStatus}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
-                  
-                  <h3 className="text-[16px] font-black text-[#0c347a] mb-[4px]">No recent activity yet!</h3>
-                  <p className="text-[12px] font-bold text-[#879ab3] text-center max-w-[200px] mb-[20px] leading-snug">Start learning to see your activity here.</p>
-                  
-                  <button onClick={() => playClick()} className="flex items-center gap-[8px] rounded-full bg-[#2b9aff] px-[20px] py-[10px] text-[13px] font-black text-white shadow-[0_4px_12px_rgba(43,154,255,0.3)] transition hover:bg-[#1a85e6]">
-                    <svg viewBox="0 0 24 24" className="h-[14px] w-[14px]" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-                    Start Learning
-                  </button>
-                </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center pt-[10px]">
+                    <div className="relative flex justify-center items-center mb-[16px]">
+                      <svg width="100" height="85" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M40 85 C20 85, 10 75, 10 65 C10 50, 30 50, 30 40 C30 30, 15 20, 35 15 C55 10, 60 25, 75 20 C90 15, 100 30, 95 45 C90 60, 110 70, 90 80 C70 90, 60 85, 40 85 Z" fill="#f4f7fb" />
+                        <rect x="40" y="20" width="40" height="56" rx="8" fill="#2b9aff" />
+                        <rect x="46" y="26" width="28" height="44" rx="4" fill="#ffffff" />
+                        <rect x="48" y="14" width="24" height="12" rx="4" fill="#69a9ff" />
+                        <path d="M52 48 L58 54 L68 38" stroke="#3ec073" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="20" cy="30" r="3" fill="#ffca3a" />
+                        <circle cx="95" cy="25" r="4" fill="#a3d4ff" />
+                        <circle cx="100" cy="65" r="3" fill="#a3d4ff" />
+                        <circle cx="25" cy="70" r="4" fill="#ffca3a" />
+                      </svg>
+                    </div>
+
+                    <h3 className="text-[16px] font-black text-[#0c347a] mb-[4px]">{t.progress.noRecentTitle}</h3>
+                    <p className="text-[12px] font-bold text-[#879ab3] text-center max-w-[200px] mb-[20px] leading-snug">{t.progress.noRecentSub}</p>
+
+                    <button
+                      onClick={() => {
+                        playClick();
+                        router.push('/learn');
+                      }}
+                      className="flex items-center gap-[8px] rounded-full bg-[#2b9aff] px-[20px] py-[10px] text-[13px] font-black text-white shadow-[0_4px_12px_rgba(43,154,255,0.3)] transition hover:bg-[#1a85e6]"
+                    >
+                      <svg viewBox="0 0 24 24" className="h-[14px] w-[14px]" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                      {t.progress.startLearning}
+                    </button>
+                  </div>
+                )}
               </div>
-
             </div>
-
           </div>
-
         </section>
       </div>
     </main>

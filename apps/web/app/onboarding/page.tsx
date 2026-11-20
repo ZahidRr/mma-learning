@@ -258,7 +258,7 @@ function OnboardingCard({
             {step === 3 && (
               <motion.div key="step3" initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -15 }} transition={{ duration: 0.2 }} className="space-y-3">
                 <div className="text-center">
-                  <h1 className="text-[23px] font-extrabold leading-tight tracking-[-0.025em] text-[#173b86]">What's your main goal?</h1>
+                  <h1 className="text-[23px] font-extrabold leading-tight tracking-[-0.025em] text-[#173b86]">What&apos;s your main goal?</h1>
                   <p className="mt-1 text-[13px] font-semibold text-[#7d8bac]">We will keep you motivated to achieve it!</p>
                 </div>
                 <div className="space-y-2 pt-1">
